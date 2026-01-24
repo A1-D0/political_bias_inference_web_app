@@ -1,5 +1,8 @@
-import { healthCheck } from './health';
 import { Express } from 'express';
+import { healthCheck } from './health';
+import { predictController } from '../controllers/predict.controller';
+import validateResource from '../middleware/validateResource';
+import { MLInferenceRequestSchema } from '../../../shared/schemas/MLInference';
 
 /**
     * Routes Module
@@ -9,6 +12,8 @@ import { Express } from 'express';
 */
 function routes(app: Express) {
     app.get('/health', healthCheck);
+
+    app.post('/predict', validateResource(MLInferenceRequestSchema), predictController);
 };
 
 export default routes;

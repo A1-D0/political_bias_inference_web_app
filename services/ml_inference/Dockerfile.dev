@@ -1,2 +1,30 @@
-# This is the Dockerfile to run in development
+# This is the Dockerfile to run in development for the 
+# ml inference service
+#
+# Author: Osvaldo Hernandez-Segura
+# Date Created: January 22, 2024
+# Date Modified: January 22, 2024
+# References: Copilot, ChatGPT, Docker Documentation
 
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        g++ \
+        python3-dev \
+        && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY wheels/ ./tmp/wheels
+RUN pip install --no-cache-dir ./tmp/wheels/utils-*.whl
+
+COPY dev_requirements.txt .
+RUN pip install --no-cache-dir -r dev_requirements.txt
+
+EXPOSE 5020
+
+COPY src ./src
+
+WORKDIR /app/src
+CMD ["python", "app.py"]

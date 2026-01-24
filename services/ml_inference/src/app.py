@@ -25,17 +25,17 @@ import pandas as pd
 
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
-from utils.data_preprocessing import TokenizerSentenceTransformer
 
 # load environment variables from .env file
+# note that this allows subfiles to access the same environment variables
+# as this main app.py file
 load_dotenv()
+
+from utils.data_preprocessing import TokenizerSentenceTransformer
+from middleware.internal_auth import internal_api_key_verification
 
 # read environment variables
 # environment variables reference:
-# PORT=
-# HOST=
-# MODEL_PATH=
-# LABEL_ENCODER_PATH=
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 5000))
 MODEL_PATH = os.getenv("MODEL_PATH")
@@ -76,16 +76,42 @@ except Exception as e:
 app = Flask(__name__)
 
 # ---------- START OF API ENDPOINTS ----------
+
+@app.before_request
+def require_internal_api_key():
+    """
+    Middleware to require internal API key verification for all endpoints
+except the health check.
+    """
+    if request.endpoint != "health_check":
+        api_key_check = internal_api_key_verification()
+
+        # return error response if API key is invalid
+        if api_key_check is not True:
+            return api_key_check  
+
 @app.get("/health")
 def health_check():
+    """
+    Health check endpoint to verify that the service is running.
+
+    Returns:
+        A Flask response indicating the service status in JSON format.
+    """
     return jsonify({"status": "ok", 
                     "port": os.getenv("PORT"),
                     "service": "ml_inference"}), 200
 
 @app.post("/predict")
 def predict():
+    """
+    Predicts the political bias of the input text using the pre-loaded model.
+
+    Returns:
+        A Flask response containing the predicted label in JSON format or an
+        error message with appropriate status code.
+    """
     data = request.get_json(force=True, silent=True) or {}
-    # data = request.get_json(force=True, silent=False) or {}
     text = (data.get("text") or "").strip()
 
     if not text:

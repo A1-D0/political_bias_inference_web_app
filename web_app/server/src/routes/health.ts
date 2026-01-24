@@ -3,7 +3,6 @@
     * This module provides a simple health check endpoint for the application. 
     * It responds with a JSON object indicating the service status.
 */
-
 import { Request, Response } from 'express';
 import { HealthResponse } from '../../../shared/schemas/health';
 
