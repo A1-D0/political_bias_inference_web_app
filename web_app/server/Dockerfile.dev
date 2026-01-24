@@ -1,0 +1,27 @@
+# This Dockerfile is for the development environment of a the 
+# server-side of the US News web application.
+#
+# Author: Osvaldo Hernandez-Segura
+# Date Created: January 22, 2026
+# Date Modified: January 22, 2026
+# References: Copilot, ChatGPT, Docker Documentation
+
+FROM node:20-alpine
+
+WORKDIR /app/server
+COPY server/package.json server/package-lock.json .
+RUN npm ci
+
+# note that for the shared/schema directory structure,
+# the docker compose file will be responsible for opening 
+# accesses via volumes the rest of the dependencies of the 
+# server files.
+
+COPY server/src ./src
+
+WORKDIR /app
+COPY shared ./shared 
+
+WORKDIR /app/server
+EXPOSE 3000 
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,19 @@
+# ignore model files
+*.model
+*.bin
+*.ckpt
+*.pt
+*.pth
+*.h5
+*.sav
+*.joblib
+models/
+models/**
+
+# ignore secret files
+secrets/
+secrets/**
+
+# ignore virtual environment files
+venv/
+venv/**

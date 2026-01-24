@@ -3,7 +3,6 @@
     * This module provides a simple health check endpoint for the application. 
     * It responds with a JSON object indicating the service status.
 */
-
 import { Request, Response } from 'express';
 import { HealthResponse } from '../../../shared/schemas/health';
 
@@ -18,9 +17,9 @@ import { HealthResponse } from '../../../shared/schemas/health';
 export const healthCheck = (req: Request, res: Response) => {
     const payload: HealthResponse = {
         status: "ok",
-        service: "healthy",
+        service: "server",
         timestamp: new Date().toISOString(),
-        uptime_seconds: process.uptime(),
+        uptime_seconds: Math.floor(process.uptime()),
     };
     res.status(200).send(payload);
 }
