@@ -22,9 +22,11 @@ import os
 import joblib
 import torch
 import pandas as pd
+import time
 
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 
 # load environment variables from .env file
 # note that this allows subfiles to access the same environment variables
@@ -33,6 +35,9 @@ load_dotenv()
 
 from utils.data_preprocessing import TokenizerSentenceTransformer
 from middleware.internal_auth import internal_api_key_verification
+
+# get start time for uptime calculation
+START_TIME = time.time()
 
 # read environment variables
 # environment variables reference:
@@ -75,6 +80,8 @@ except Exception as e:
 
 app = Flask(__name__)
 
+print(f"ML Inference Service is running on http://{HOST}:{PORT}")
+
 # ---------- START OF API ENDPOINTS ----------
 
 @app.before_request
@@ -98,9 +105,18 @@ def health_check():
     Returns:
         A Flask response indicating the service status in JSON format.
     """
+    UPTIME_SECONDS = int(time.time() - START_TIME)
+    try:
+        utc_now = datetime.now(timezone.utc)
+        utc_now = utc_now.isoformat()
+    except Exception:
+        utc_now = "unavailable"
+
     return jsonify({"status": "ok", 
                     "port": os.getenv("PORT"),
-                    "service": "ml_inference"}), 200
+                    "service": "ml_inference",
+                    "uptime_seconds": UPTIME_SECONDS,
+                    "utc_now": utc_now}), 200
 
 @app.post("/predict")
 def predict():

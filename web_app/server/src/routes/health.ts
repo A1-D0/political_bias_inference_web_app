@@ -17,9 +17,9 @@ import { HealthResponse } from '../../../shared/schemas/health';
 export const healthCheck = (req: Request, res: Response) => {
     const payload: HealthResponse = {
         status: "ok",
-        service: "healthy",
+        service: "server",
         timestamp: new Date().toISOString(),
-        uptime_seconds: process.uptime(),
+        uptime_seconds: Math.floor(process.uptime()),
     };
     res.status(200).send(payload);
 }

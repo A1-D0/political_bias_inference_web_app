@@ -36,10 +36,12 @@ class PredictModel {
                 body: JSON.stringify(text)
             });
 
-            if (!(result instanceof String) || !result) return false;
+            const data = await result.json();
+
+            if (!data || !data.prediction) return false;
 
             const deliverable = { 
-                prediction: result 
+                prediction: data.prediction 
             } satisfies MLInferenceResponse;
 
             return deliverable; 
