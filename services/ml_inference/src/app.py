@@ -13,7 +13,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    January 20, 2026
+    January 26, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -34,7 +34,7 @@ from datetime import datetime, timezone
 load_dotenv()
 
 from utils.data_preprocessing import TokenizerSentenceTransformer
-from middleware.internal_auth import internal_api_key_verification
+from src.middleware.internal_auth import internal_api_key_verification
 
 # get start time for uptime calculation
 START_TIME = time.time()
