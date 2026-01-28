@@ -16,7 +16,7 @@ Date Created:
     January 26, 2026
 
 Date Modified:
-    January 26, 2026
+    January 27, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -46,7 +46,12 @@ Defense Secretary Pete Hegseth had to make an emergency landing in the United Ki
 in the windshield.
 """
 
-TEST_API_KEY = "ci-test-api-key"
+import os
+
+KEY_PATH = os.environ["INTERNAL_API_KEY"]
+
+with open(KEY_PATH, "r") as f:
+    TEST_API_KEY = f.read().strip()
 
 def test_predict_ok(client):
     resp = client.post("/predict", 
