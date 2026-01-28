@@ -48,7 +48,8 @@ jobs:
         env: 
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p src/models
+          # this dir already exists in the repo structure
+          # mkdir src/models
 
           gh release download "Inference_Models_v1.0" \
             --repo "${{ github.repository }}" \
