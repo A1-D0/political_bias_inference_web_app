@@ -54,13 +54,6 @@ jobs:
           mkdir -p secrets
           echo "ci-test-api-key" > secrets/test_api_key.txt
 
-      - name: Debug key + paths
-        run: | 
-          pwd
-          ls -la secrets || true
-          cat secrets/test_api_key.txt
-          python -c "from pathlib import Path; import os; p=os.environ.get('INTERNAL_API_KEY'); print('key path:', p); print('exists:', Path(p).exists() if p else None)"
-
       - name: Run pytest
         env: 
           INTERNAL_API_KEY: secrets/test_api_key.txt
