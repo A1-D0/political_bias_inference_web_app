@@ -29,7 +29,6 @@ jobs:
           ls -la us_news_web/services/ml_inference || true
           find . -maxdepth 4 -name "dev_requirements.txt" -o -name "requirements.txt" -o -name "pyproject.toml"
 
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
