@@ -56,8 +56,8 @@ jobs:
             --pattern "model_artifacts_v1.zip" \
             --dir src/models
 
-          unzip -o src/models/model_artifacts_01.zip -d src/models/
-          rm src/models/model_artifacts_01.zip
+          unzip -o src/models/model_artifacts_v1.zip -d src/models/
+          rm src/models/model_artifacts_v1.zip
           ls -la src/models/
 
       - name: Create test API key file
