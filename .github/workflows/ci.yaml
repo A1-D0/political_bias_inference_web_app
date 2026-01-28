@@ -18,14 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug repo layout
-        run: |
-          pwd
-          ls -la
-          ls -la services || true
-          ls -la services/ml_inference || true
-          find . -maxdepth 4 -name "dev_requirements.txt" -o -name "requirements.txt" -o -name "pyproject.toml"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -48,9 +40,6 @@ jobs:
         env: 
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # this dir already exists in the repo structure
-          # mkdir src/models
-
           gh release download "Inference_Models_v1.0" \
             --repo "${{ github.repository }}" \
             --pattern "model_artifacts_v1.zip" \
@@ -64,6 +53,13 @@ jobs:
         run: |
           mkdir -p secrets
           echo "ci-test-key" > secrets/test_api_key.txt
+
+      - name: Debug key + paths
+        run: | 
+          pwd
+          ls -la secrets || true
+          cat secrets/test_api_key.txt
+          python -c "from pathlib import Path; import os; p=os.environ.get('INTERNAL_API_KEY'); print('key path:', p); print('exists:', Path(p).exists() if p else None)"
 
       - name: Run pytest
         env: 
