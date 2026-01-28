@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependecy-path: dev_requirements.txt
+          cache-dependency-path: dev_requirements.txt
 
       - name: Install GitHub CLI and unzip
         run: |
