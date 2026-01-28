@@ -52,7 +52,7 @@ jobs:
       - name: Create test API key file
         run: |
           mkdir -p secrets
-          echo "ci-test-key" > secrets/test_api_key.txt
+          echo "ci-test-api-key" > secrets/test_api_key.txt
 
       - name: Debug key + paths
         run: | 
