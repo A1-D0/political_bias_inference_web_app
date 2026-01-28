@@ -1,7 +1,7 @@
 name: CI
 
 on: 
-pull_request:
+  pull_request:
   push:
     branches: [main]
 
@@ -9,58 +9,58 @@ jobs:
   flask-tests:
     runs-on: ubuntu-latest
 
-  permissions:
-    contents: read
+    permissions:
+      contents: read
 
-  defaults:
-    run:
-      working-directory: us_news_web/services/ml_inference
+    defaults:
+      run:
+        working-directory: us_news_web/services/ml_inference
 
-  steps:
-    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-        cache-dependecy-path: us_news_web/services/ml_inference/dev_requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependecy-path: us_news_web/services/ml_inference/dev_requirements.txt
 
-    - name: Install GitHub CLI
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gh
+      - name: Install GitHub CLI and unzip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh unzip
 
-    - name: Download model assets from the latest GitHub Release
-      env: 
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        mkdir -p src/models
+      - name: Download model assets from the latest GitHub Release
+        env: 
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p src/models
 
-        gh release download "$Inference_Models_v1.0" \ 
-          --repo "${{ github.repository }}" \
-          --pattern "model_artifacts_01.zip" \
-          --dir src/models
+          gh release download "$Inference_Models_v1.0" \ 
+            --repo "${{ github.repository }}" \
+            --pattern "model_artifacts_01.zip" \
+            --dir src/models
 
-        unzip src/models/model_artifacts_01.zip -d src/models/
-        rm src/models/model_artifacts_01.zip
-        ls -la src/models/
+          unzip src/models/model_artifacts_01.zip -d src/models/
+          rm src/models/model_artifacts_01.zip
+          ls -la src/models/
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r dev_requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r dev_requirements.txt
 
-    - name: Create test API key file
-      run: |
-        mkdir -p secrets
-        echo "ci-test-key" > secrets/test_api_key.txt
+      - name: Create test API key file
+        run: |
+          mkdir -p secrets
+          echo "ci-test-key" > secrets/test_api_key.txt
 
-    - name: Run pytest
-      env: 
-        INTERNAL_API_KEY: ${{ github.workspace }}/us_news_web/services/ml_inference/secrets/test_api_key.txt
-        MODEL_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/linear_svc_pipeline_v1.joblib
-        LABEL_ENCODER_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/articles-bypublisher_LabelEncoder_v1.joblib
-      run: |
-        python -m pytest -q
+      - name: Run pytest
+        env: 
+          INTERNAL_API_KEY: ${{ github.workspace }}/us_news_web/services/ml_inference/secrets/test_api_key.txt
+          MODEL_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/linear_svc_pipeline_v1.joblib
+          LABEL_ENCODER_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/articles-bypublisher_LabelEncoder_v1.joblib
+        run: |
+          python -m pytest -q
 
