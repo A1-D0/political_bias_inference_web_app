@@ -14,7 +14,8 @@ jobs:
 
     defaults:
       run:
-        working-directory: us_news_web/services/ml_inference
+        # working-directory: us_news_web/services/ml_inference
+        working-directory: services/ml_inference
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +25,8 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: us_news_web/services/ml_inference/dev_requirements.txt
+          # cache-dependency-path: us_news_web/services/ml_inference/dev_requirements.txt
+          cache-dependency-path: services/ml_inference/dev_requirements.txt
 
       - name: Install dependencies
         run: |
@@ -42,7 +44,7 @@ jobs:
         run: |
           mkdir -p src/models
 
-          gh release download "Inference_Models_v1.0" \ 
+          gh release download "Inference_Models_v1.0" \
             --repo "${{ github.repository }}" \
             --pattern "model_artifacts_01.zip" \
             --dir src/models
