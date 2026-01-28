@@ -34,9 +34,12 @@ import os
 
 # Relative paths based on the location of the test files given the ROOT directory
 # These environment variables must be set before importing the app 
-os.environ["INTERNAL_API_KEY"] = str(ROOT / "secrets" / "test_api_key.txt") 
-os.environ["MODEL_PATH"] = str(ROOT / "src" / "models" / "linear_svc_pipeline_v1.joblib")
-os.environ["LABEL_ENCODER_PATH"] = str(ROOT / "src" / "models" / "articles-bypublisher_LabelEncoder_v1.joblib")
+os.environ.setdefault("INTERNAL_API_KEY", 
+                      str(ROOT / "secrets" / "test_api_key.txt"))
+os.environ.setdefault("MODEL_PATH", 
+                      str(ROOT / "src" / "models" / "linear_svc_pipeline_v1.joblib"))
+os.environ.setdefault("LABEL_ENCODER_PATH", 
+                      str(ROOT / "src" / "models" / "articles-bypublisher_LabelEncoder_v1.joblib"))
 
 import pytest
 from src.app import app
