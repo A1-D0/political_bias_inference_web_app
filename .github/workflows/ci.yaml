@@ -42,12 +42,12 @@ jobs:
         run: |
           mkdir -p src/models
 
-          gh release download "$Inference_Models_v1.0" \ 
+          gh release download "Inference_Models_v1.0" \ 
             --repo "${{ github.repository }}" \
             --pattern "model_artifacts_01.zip" \
             --dir src/models
 
-          unzip src/models/model_artifacts_01.zip -d src/models/
+          unzip -o src/models/model_artifacts_01.zip -d src/models/
           rm src/models/model_artifacts_01.zip
           ls -la src/models/
 
