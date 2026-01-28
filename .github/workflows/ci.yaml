@@ -13,7 +13,6 @@ jobs:
 
     defaults:
       run:
-        # working-directory: us_news_web/services/ml_inference
         working-directory: services/ml_inference
 
     steps:
@@ -23,9 +22,8 @@ jobs:
         run: |
           pwd
           ls -la
-          ls -la us_news_web || true
-          ls -la us_news_web/services || true
-          ls -la us_news_web/services/ml_inference || true
+          ls -la services || true
+          ls -la services/ml_inference || true
           find . -maxdepth 4 -name "dev_requirements.txt" -o -name "requirements.txt" -o -name "pyproject.toml"
 
       - name: Set up Python

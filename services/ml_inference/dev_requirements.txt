@@ -64,7 +64,6 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.3
 urllib3==2.6.3
--e git+https://github.com/A1-D0/us_news_ml.git@83a20e0a5eb10487aa0de89c369748863f4a3938#egg=utils&subdirectory=ml_development/src
 wasabi==1.1.3
 weasel==0.4.3
 Werkzeug==3.1.5
