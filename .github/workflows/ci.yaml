@@ -53,7 +53,7 @@ jobs:
 
           gh release download "Inference_Models_v1.0" \
             --repo "${{ github.repository }}" \
-            --pattern "model_artifacts_01.zip" \
+            --pattern "model_artifacts_v1.zip" \
             --dir src/models
 
           unzip -o src/models/model_artifacts_01.zip -d src/models/
