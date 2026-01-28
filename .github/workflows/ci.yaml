@@ -1,9 +1,8 @@
 name: CI
 
 on: 
-  pull_request:
   push:
-    branches: [main]
+  pull_request:
 
 jobs:
   flask-tests:
@@ -33,9 +32,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          # cache: 'pip'
           # cache-dependency-path: us_news_web/services/ml_inference/dev_requirements.txt
-          cache-dependency-path: services/ml_inference/dev_requirements.txt
+          # cache-dependency-path: services/ml_inference/dev_requirements.txt
 
       - name: Install dependencies
         run: |
@@ -69,9 +68,12 @@ jobs:
 
       - name: Run pytest
         env: 
-          INTERNAL_API_KEY: ${{ github.workspace }}/us_news_web/services/ml_inference/secrets/test_api_key.txt
-          MODEL_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/linear_svc_pipeline_v1.joblib
-          LABEL_ENCODER_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/articles-bypublisher_LabelEncoder_v1.joblib
+          # INTERNAL_API_KEY: ${{ github.workspace }}/us_news_web/services/ml_inference/secrets/test_api_key.txt
+          # MODEL_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/linear_svc_pipeline_v1.joblib
+          # LABEL_ENCODER_PATH: ${{ github.workspace }}/us_news_web/services/ml_inference/src/models/articles-bypublisher_LabelEncoder_v1.joblib
+          INTERNAL_API_KEY: secrets/test_api_key.txt
+          MODEL_PATH: src/models/linear_svc_pipeline_v1.joblib
+          LABEL_ENCODER_PATH: src/models/articles-bypublisher_LabelEncoder_v1.joblib
         run: |
           python -m pytest -q
 
