@@ -39,7 +39,7 @@ services:
       - ./web_app/server/.env
     environment:
       - INFERENCE_API_URL=http://ml-inference-service:5020
-      - INFERERENCE_API_KEY=/app/secrets/INTERNAL_API_KEY.txt
+      - INFERENCE_API_KEY=/app/secrets/INTERNAL_API_KEY.txt
     ports:
       - "3000:3000"
     volumes:
