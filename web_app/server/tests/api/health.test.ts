@@ -1,3 +1,7 @@
+/*
+    * This test file checks the health check endpoint of the server.
+    * It ensures that the server is running and responding correctly.
+*/
 import request from 'supertest';
 import app from '../../src/app'; 
 
