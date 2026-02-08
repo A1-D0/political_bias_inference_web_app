@@ -4,7 +4,7 @@
     * It responds with a JSON object indicating the service status.
 */
 import { Request, Response } from 'express';
-import { HealthResponse } from '../../../shared/schemas/health';
+import { HealthResponse } from '@usnewsweb/shared/schemas/health';
 
 /**
     * Health Check Handler

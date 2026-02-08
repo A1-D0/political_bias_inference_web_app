@@ -2,7 +2,7 @@ import { Express } from 'express';
 import { healthCheck } from './health';
 import { predictController } from '../controllers/predict.controller';
 import validateResource from '../middleware/validateResource';
-import { MLInferenceRequestSchema } from '../../../shared/schemas/MLInference';
+import { MLInferenceRequestSchema } from '@usnewsweb/shared/schemas/MLInference';
 
 /**
     * Routes Module

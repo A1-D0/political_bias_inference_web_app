@@ -29,3 +29,9 @@ dist-ssr
 __pycache__/
 **/venv/
 venv/
+
+# Secret files
+**/*secret*/
+*.key
+*.pem
+secrets*

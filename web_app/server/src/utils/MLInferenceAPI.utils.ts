@@ -8,13 +8,13 @@
 */
 import fs from 'fs';
 
-const INFERENCE_API_KEY_PATH = String(process.env.INFERERENCE_API_KEY || '');
+const INFERENCE_API_KEY_PATH = String(process.env.INFERENCE_API_KEY || '');
 
 if (!INFERENCE_API_KEY_PATH) {
     throw new Error('Inference API key path not found');
 }
 
-const INFERENCE_API_KEY = fs.readFileSync(String(process.env.INFERERENCE_API_KEY) || '', 'utf8').trim();
+const INFERENCE_API_KEY = fs.readFileSync(String(process.env.INFERENCE_API_KEY) || '', 'utf8').trim();
 
 const INFERENCE_API_URL = String(process.env.INFERENCE_API_URL || '');
 
