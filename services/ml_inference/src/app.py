@@ -6,6 +6,10 @@ Description:
     from specified file paths, and the predict API handles input validation 
     and error reporting.
 
+How to run:
+    Ensure you are in the src/ directory where app.py is located. 
+    Then run: python app.py
+
 Author:
     Osvaldo Hernandez-Segura
 
@@ -13,7 +17,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    January 26, 2026
+    February 8, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -34,7 +38,7 @@ from datetime import datetime, timezone
 load_dotenv()
 
 from utils.data_preprocessing import TokenizerSentenceTransformer
-from src.middleware.internal_auth import internal_api_key_verification
+from middleware.internal_auth import internal_api_key_verification 
 
 # get start time for uptime calculation
 START_TIME = time.time()
