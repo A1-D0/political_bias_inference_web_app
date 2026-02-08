@@ -8,6 +8,11 @@ const config: Config = {
     bail: 0,
     verbose: true,
     setupFiles: ['<rootDir>/tests/setup.ts'],
+    globals: {
+        "ts-jest": {
+            diagnostics: { ignoreCodes: [151002] }
+        }
+    }
 };
 
 export default config;

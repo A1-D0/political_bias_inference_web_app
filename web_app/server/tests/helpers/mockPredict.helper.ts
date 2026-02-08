@@ -8,12 +8,11 @@
     * Date Modified: February 7, 2026
     * References: Copilot, ChatGPT, GeeksForGeeks, StackOverflow
 */
-
 import dotenv from 'dotenv';
 dotenv.config({ path: ".env.test" });
 
 import fs from 'fs';
-import { MLInferenceResponse } from '../../../shared/schemas/MLInference';
+import { MLInferenceResponse } from '@usnewsweb/shared/schemas/MLInference';
 
 function mockPredict() {
     global.fetch = jest.fn(async (url: any, options: any) => {
