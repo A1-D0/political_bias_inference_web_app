@@ -7,8 +7,10 @@ Description:
     and error reporting.
 
 How to run:
-    Ensure you are in the src/ directory where app.py is located. 
-    Then run: python app.py
+    Ensure the necessary environment variables are set through a .env file,
+    and that you have install the ml_inference_app module using pip install -e . 
+    from the root directory of the project. 
+    This command can be run from anywhere: ml-inference-service 
 
 Author:
     Osvaldo Hernandez-Segura
@@ -31,6 +33,7 @@ import time
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from datetime import datetime, timezone
+from pathlib import Path
 
 # load environment variables from .env file
 # note that this allows subfiles to access the same environment variables
@@ -38,23 +41,45 @@ from datetime import datetime, timezone
 load_dotenv()
 
 from utils.data_preprocessing import TokenizerSentenceTransformer
-from middleware.internal_auth import internal_api_key_verification 
+from ml_inference_app.middleware.internal_auth import internal_api_key_verification
 
 # get start time for uptime calculation
 START_TIME = time.time()
 
+# --------- START OF CONFIGURATION AND SETUP ---------
+# add environmental variables for model and label encoder paths, 
+# with validation and a default value
+HERE = Path(__file__).resolve().parent
+ROOT = APP_BASE = HERE.parent.parent
+
+def resolve_dir(dir_value: str | None, default: Path) -> Path:
+    """
+    Resolves a directory path from an environment variable, ensuring it is absolute.
+
+    Args:
+        dir_value (str | None): The directory path from the environment variable.
+        default (Path): The default path to use if dir_value is not provided.
+
+    Returns:
+        The resolved absolute Path object for the directory.
+    """
+    if not dir_value:
+        return default
+    p = Path(dir_value)
+    return p if p.is_absolute() else (APP_BASE / p)
+
+MODELS_DIR = resolve_dir(os.getenv("MODELS_DIR"), ROOT / "models")
+MODEL_FILE = os.getenv("MODEL_FILE")
+LABLE_ENCODER_FILE = os.getenv("LABEL_ENCODER_FILE")
+
+if not MODEL_FILE:
+    raise RuntimeError("MODEL_FILE environment variable is not set.")
+if not LABLE_ENCODER_FILE:
+    raise RuntimeError("LABEL_ENCODER_FILE environment variable is not set.")
+
 # read environment variables
-# environment variables reference:
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 5000))
-MODEL_PATH = os.getenv("MODEL_PATH")
-LABEL_ENCODER_PATH = os.getenv("LABEL_ENCODER_PATH") 
-
-# validate required environment variables
-if not MODEL_PATH:
-    raise ValueError("MODEL_PATH environment variable is not set.")
-if not LABEL_ENCODER_PATH:
-    raise ValueError("LABEL_ENCODER_PATH environment variable is not set.")
 
 # adjust torch device for TokenizerSentenceTransformer
 # before loading the model
@@ -72,6 +97,8 @@ else:
     torch.load = cpu_torch_load
 
 # load the model and label encoder
+MODEL_PATH = MODELS_DIR / MODEL_FILE
+LABEL_ENCODER_PATH = MODELS_DIR / LABLE_ENCODER_FILE
 try:
     model = joblib.load(MODEL_PATH)
 except Exception as e:
@@ -85,6 +112,7 @@ except Exception as e:
 app = Flask(__name__)
 
 print(f"ML Inference Service is running on http://{HOST}:{PORT}")
+# --------- END OF CONFIGURATION AND SETUP ---------
 
 # ---------- START OF API ENDPOINTS ----------
 
@@ -156,8 +184,10 @@ def predict():
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
 # ---------- END OF API ENDPOINTS ----------
-
-if __name__ == "__main__":
+def main():
     app.run(host=HOST,
             port=PORT,
             debug=True)
+
+if __name__ == "__main__":
+    main()
