@@ -57,10 +57,10 @@ jobs:
 
       - name: Run pytest
         env: 
-          MODELS_DIR=src/ml_inference_app/models
-          MODEL_FILE=linear_svc_pipeline_v1.joblib
-          LABEL_ENCODER_FILE=articles-bypublisher_LabelEncoder_v1.joblib
-          INTERNAL_API_KEY=secrets/test_api_key.txt
+          MODELS_DIR: src/ml_inference_app/models
+          MODEL_FILE: linear_svc_pipeline_v1.joblib
+          LABEL_ENCODER_FILE: articles-bypublisher_LabelEncoder_v1.joblib
+          INTERNAL_API_KEY: secrets/test_api_key.txt
         run: |
           python -m pytest -q
 
