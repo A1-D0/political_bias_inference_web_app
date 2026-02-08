@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ml-inference"
+version = "0.1.0"
+dependencies = []
+description = "A python package for machine learning inference service."
+
+# This section specifies the build system requirements and the build backend to use.
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+# This section tells setuptools to find packages in the "src" directory.
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# This section defines a console script entry point for the package. 
+# When the package is installed, it will create a command-line executable named 
+# "ml-inference-service" that runs the "main" function in the "ml_inference.app" module.
+[project.scripts]
+ml-inference-service = "ml_inference_app.app:main"

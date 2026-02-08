@@ -17,32 +17,31 @@ Date Created:
     January 26, 2026
 
 Date Modified:
-    January 26, 2026
+    February 8, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
 """
 import sys
 from pathlib import Path
+import os
 
 # Add the root directory to sys.path
 # This is to ensure that imports from the src directory work correctly
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-import os
 
 # Relative paths based on the location of the test files given the ROOT directory
 # These environment variables must be set before importing the app 
 os.environ.setdefault("INTERNAL_API_KEY", 
                       str(ROOT / "secrets" / "test_api_key.txt"))
 os.environ.setdefault("MODEL_PATH", 
-                      str(ROOT / "src" / "models" / "linear_svc_pipeline_v1.joblib"))
+                      str(ROOT / "src" / "ml_inference_app" / "models" / "linear_svc_pipeline_v1.joblib"))
 os.environ.setdefault("LABEL_ENCODER_PATH", 
-                      str(ROOT / "src" / "models" / "articles-bypublisher_LabelEncoder_v1.joblib"))
+                      str(ROOT / "src" / "ml_inference_app" /"models" / "articles-bypublisher_LabelEncoder_v1.joblib"))
 
 import pytest
-from src.app import app
+# from src.app import app
+from ml_inference_app.app import app
 
 @pytest.fixture
 def client():
