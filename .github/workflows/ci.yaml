@@ -46,7 +46,7 @@ jobs:
             --pattern "model_artifacts_v1.zip" \
             --dir src/ml_inference_app/models
 
-          unzip -o src/ml_inference_app/models/model_artifacts_v1.zip -d src/models/
+          unzip -o src/ml_inference_app/models/model_artifacts_v1.zip -d src/ml_inference_app/models/
           rm src/ml_inference_app/models/model_artifacts_v1.zip
           ls -la src/ml_inference_app/models/
 
