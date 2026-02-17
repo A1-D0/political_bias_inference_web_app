@@ -3,21 +3,21 @@
 # is used to build the image that will be pushed to ECR and run on App Runner.
 # Note that this Dockerfile is to be built in the web_app/ directory.
 #
-# How to build locally for testing:
+# How to build locally for testing, run from the web_app/ directory:
 #   docker build -f server/Dockerfile -t usnews-server:prod . 
 #
-# How to run locally for testing (make sure paths are absolute):
+# How to run locally for testing (make sure paths are container absolute):
 #  docker run -p 3000:3000 \
 #   -e PORT=3000 \
 #   -e INFERENCE_API_URL="http://host.docker.internal:5020" \
-#   -e INFERENCE_API_KEY="/app/service/secrets/INFERENCE_API_KEY.txt" \
+#   -e INFERENCE_API_KEY="/app/server/secrets/INFERENCE_API_KEY.txt" \
 #   -e RAW_API_KEY="actual-api-key" \
 #   --name usnews-server-prod \
 #   usnews-server:prod
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026 
-# Date Modified: February 12, 2026 
+# Date Modified: February 16, 2026 
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine
