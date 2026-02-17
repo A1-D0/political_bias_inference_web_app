@@ -1,6 +1,9 @@
 annotated-types==0.7.0
 blinker==1.9.0
 blis==1.3.3
+boto3>=1.34
+boto3[crt]>=1.34
+botocore>=1.34
 catalogue==2.0.10
 certifi==2026.1.4
 charset-normalizer==3.4.4
@@ -12,6 +15,7 @@ fasttext==0.9.3
 filelock==3.20.3
 Flask==3.1.2
 fsspec==2026.1.0
+gunicorn==25.1.0
 hf-xet==1.2.0
 huggingface-hub==0.36.0
 humanize==4.15.0
