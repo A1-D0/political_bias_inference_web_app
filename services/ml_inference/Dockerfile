@@ -1,2 +1,81 @@
-# This is the Dockerfile to run in production 
+# This is the Dockerfile to run in production for the ml inference service. 
+# This Dockerfile is used to build the image that will be pushed to ECR and run on App Runner.
+# 
+# How to build locally for testing, run from the ml_inference/ directory:
+#   docker build -f Dockerfile -t ml-inference-service:prod .
+#
+# How to run locally for testing (this is formatted as a multi-line command for readability, 
+# but should be run as a single command in the terminal, making sure to write this in one line):
+#   docker run -p 5020:5020 \
+#   -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \
+#   -e AWS_SESSION_TOKEN -e AWS_REGION \
+#
+#   -e RAW_API_KEY="actual-api-key" \ 
+#   -e MODEL_BUCKET="us-news-bias-models" -e MODEL_PREFIX="models" \
+#
+#   -e HOST=0.0.0.0 -e PORT=5020 \
+#   -e MODELS_DIR="/app/src/ml_inference_app/models" \
+#   -e MODEL_FILE="linear_svc_pipeline_v1.joblib" \
+#   -e LABEL_ENCODER_FILE="articles-bypublisher_LabelEncoder_v1.joblib" \
+#   -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" \ 
+#   --name ml-inference-service-prod \
+#   ml-inference-service:prod
+# 
+# One-liner version of the above command for testing locally: 
+# docker run -p 5020:5020 -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION -e RAW_API_KEY="actual-api-key" -e MODEL_BUCKET="us-news-bias-models" -e MODEL_PREFIX="models/" -e HOST=0.0.0.0 -e PORT=5020 -e MODELS_DIR="/app/src/ml_inference_app/models" -e MODEL_FILE="linear_svc_pipeline_v1.joblib" -e LABEL_ENCODER_FILE="articles-bypublisher_LabelEncoder_v1.joblib" -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" --name ml-inference-service-prod ml-inference-service:prod
+# 
+# To get the AWS credentials for testing locally, 
+# run the following commands, assuming AWS CLI is installed
+# and the IAM user and US-News-Web-App can be assumed to exist in the terminal 
+# (check AWS IAM 'Roles' and 'Permissions'): 
+#   1. chmod +x src/aws_scripts/aws_export_role.sh
+#   2. source src/aws_scripts/aws_export_role.sh
+#
+# Note that if you are attempting these commands and they don't work: 
+# - Check whether you are in a ROLE session or IAM USER session in the terminal.
+# - Run 'unset <CRED-NAME>' for each AWS credential to clear the environment variables 
+#   if you need to switch between different IAM users or roles for testing.
+#   One-liner version: 
+#       unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE
+#
+# Author: Osvaldo Hernandez-Segura
+# Date Created: February 14, 2026
+# Date Modified: February 16, 2026
+# References: Copilot, ChatGPT
 
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        g++ \
+        python3-dev \
+        && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the custom utils wheel and install it. 
+# This is necessary because the ml inference service depends on the utils package.
+COPY wheels/ ./tmp/wheels
+RUN pip install --no-cache-dir ./tmp/wheels/utils-*.whl
+
+# Copy the production requirements and install them.
+COPY dev_requirements.txt .
+RUN pip install --no-cache-dir -r dev_requirements.txt
+
+COPY src/aws_scripts ./src/aws_scripts
+COPY src/ml_inference_app ./src/ml_inference_app
+COPY pyproject.toml entrypoint.service.sh . 
+
+# Install the ml inference service package to allow us 
+# to run the service using the command line interface.
+RUN pip install -e .
+
+EXPOSE 5020
+
+# Download model artifacts from S3 
+RUN chmod +x entrypoint.service.sh
+ENTRYPOINT ["/app/entrypoint.service.sh"]
+
+# Run the ml inference service using gunicorn with 2 workers to allow for concurrent requests.
+WORKDIR /app/src/
+CMD ["gunicorn", "ml_inference_app.app:app", "--bind", "0.0.0.0:5020", "--workers", "2"]

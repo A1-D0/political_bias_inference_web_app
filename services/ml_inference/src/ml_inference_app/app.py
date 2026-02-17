@@ -10,7 +10,8 @@ How to run:
     Ensure the necessary environment variables are set through a .env file,
     and that you have install the ml_inference_app module using pip install -e . 
     from the root directory of the project. 
-    This command can be run from anywhere: ml-inference-service 
+    This command can be run from anywhere during local development:
+        ml-inference-service 
 
 Author:
     Osvaldo Hernandez-Segura
@@ -19,7 +20,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    February 8, 2026
+    February 14, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -71,6 +72,7 @@ def resolve_dir(dir_value: str | None, default: Path) -> Path:
 MODELS_DIR = resolve_dir(os.getenv("MODELS_DIR"), ROOT / "models")
 MODEL_FILE = os.getenv("MODEL_FILE")
 LABLE_ENCODER_FILE = os.getenv("LABEL_ENCODER_FILE")
+DEBUG_MODE = int(os.getenv("DEBUG_MODE", 0)) == 1  # Default to 0 (False) if not set
 
 if not MODEL_FILE:
     raise RuntimeError("MODEL_FILE environment variable is not set.")
@@ -185,9 +187,11 @@ def predict():
 
 # ---------- END OF API ENDPOINTS ----------
 def main():
+    if not DEBUG_MODE:
+        return
     app.run(host=HOST,
             port=PORT,
-            debug=True)
+            debug=DEBUG_MODE)
 
 if __name__ == "__main__":
     main()
