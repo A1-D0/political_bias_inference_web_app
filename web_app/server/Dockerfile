@@ -15,9 +15,30 @@
 #   --name usnews-server-prod \
 #   usnews-server:prod
 #
+# How to build the Docker image for production and push to ECR, 
+# run from the web_app/ directory, assuming you have AWS IAM user:
+# 1. Build the Docker image for AMD64 (this process may take a while): 
+#       docker buildx build --platform linux/amd64 -f server/Dockerfile -t usnews-server:prod . 
+# 2. Get caller identity (who are in AWS):
+#       aws sts get-caller-identity
+# 3. Create ECR repo (ignore if repo already exists):
+#       aws ecr create-repository \
+#       --region us-east-1 \
+#       --repository-name usnews-server 
+# 4. Set account id to local shell session:
+#       ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+# 5. Authenticate Docker to ECR: 
+#       aws ecr get-login-password --region us-east-1 \
+#       | docker login --username AWS --password-stdin \
+#       ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
+# 6. Tag the Docker image for ECR:
+#       docker tag usnews-server:prod ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/usnews-server:prod
+# 3. Push the Docker image to ECR:
+#       docker push ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/usnews-server:prod
+#
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026 
-# Date Modified: February 16, 2026 
+# Date Modified: February 18, 2026 
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine
