@@ -26,6 +26,9 @@ else
     echo "RAW_API_KEY not found in environment variables. Server may not function properly."
 fi
 
+# Make the secrets file read-only
+chmod 400 /app/server/secrets/INFERENCE_API_KEY.txt
+
 # Run the container CMD,
 # which should be the command to start the server in Dockerfile
 exec "$@"

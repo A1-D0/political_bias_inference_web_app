@@ -2,7 +2,7 @@
 # This Dockerfile is used to build the image that will be pushed to ECR and run on App Runner.
 # 
 # How to build locally for testing, run from the ml_inference/ directory:
-#   docker build -f Dockerfile -t ml-inference-service:prod .
+#   docker build -f Dockerfile -t us_news_web-ml-inference-service:prod .
 #
 # How to run locally for testing (this is formatted as a multi-line command for readability, 
 # but should be run as a single command in the terminal, making sure to write this in one line):
@@ -10,19 +10,19 @@
 #   -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \
 #   -e AWS_SESSION_TOKEN -e AWS_REGION \
 #
-#   -e RAW_API_KEY="actual-api-key" \
+#   -e RAW_API_KEY="actual-api-key" \ 
 #   -e MODEL_BUCKET="us-news-bias-models" -e MODEL_PREFIX="models" \
 #
 #   -e HOST=0.0.0.0 -e PORT=5020 \
 #   -e MODELS_DIR="/app/src/ml_inference_app/models" \
 #   -e MODEL_FILE="linear_svc_pipeline_v1.joblib" \
 #   -e LABEL_ENCODER_FILE="articles-bypublisher_LabelEncoder_v1.joblib" \
-#   -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" \
-#   --name ml-inference-service-prod \
-#   ml-inference-service:prod
+#   -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" \ 
+#   --name us_news_web-ml-inference-service-prod \
+#   us_news_web-ml-inference-service:prod
 # 
 # One-liner version of the above command for testing locally: 
-# docker run -p 5020:5020 -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION -e RAW_API_KEY="actual-api-key" -e MODEL_BUCKET="us-news-bias-models" -e MODEL_PREFIX="models/" -e HOST=0.0.0.0 -e PORT=5020 -e MODELS_DIR="/app/src/ml_inference_app/models" -e MODEL_FILE="linear_svc_pipeline_v1.joblib" -e LABEL_ENCODER_FILE="articles-bypublisher_LabelEncoder_v1.joblib" -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" --name ml-inference-service-prod ml-inference-service:prod
+# docker run -p 5020:5020 -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION -e RAW_API_KEY="actual-api-key" -e MODEL_BUCKET="us-news-bias-models" -e MODEL_PREFIX="models/" -e HOST=0.0.0.0 -e PORT=5020 -e MODELS_DIR="/app/src/ml_inference_app/models" -e MODEL_FILE="linear_svc_pipeline_v1.joblib" -e LABEL_ENCODER_FILE="articles-bypublisher_LabelEncoder_v1.joblib" -e INTERNAL_API_KEY="/app/secrets/INFERENCE_API_KEY.txt" --name us_news_web-ml-inference-service-prod us_news_web-ml-inference-service:prod
 # 
 # To get the AWS credentials for testing locally, 
 # run the following commands, assuming AWS CLI is installed
@@ -36,12 +36,12 @@
 # - Run 'unset <CRED-NAME>' for each AWS credential to clear the environment variables 
 #   if you need to switch between different IAM users or roles for testing.
 #   One-liner version: 
-#       unset aws_access_key_id aws_secret_access_key aws_session_token aws_profile
+#       unset aws_access_key_id aws_secret_access_key aws_session_token aws_profile aws_region aws_default_region
 #
 # How to build the Docker image for production and push to ECR, 
 # run from the ml_inference/ directory, assuming you have AWS IAM user:
 # 1. Build the Docker image for AMD64 (this process may take a while): 
-#       docker buildx build --platform linux/amd64 -f Dockerfile -t ml-inference-service:prod . 
+#       docker buildx build --platform linux/amd64 -f Dockerfile -t us_news_web-ml-inference-service:prod . 
 # 2. Get caller identity (who are in AWS):
 #       aws sts get-caller-identity
 # 3. Create ECR repo (ignore if repo already exists):
@@ -55,7 +55,7 @@
 #       | docker login --username AWS --password-stdin \
 #       ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
 # 6. Tag the Docker image for ECR:
-#       docker tag ml-inference-service:prod ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference-service:prod
+#       docker tag us_news_web-ml-inference-service:prod ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference-service:prod
 # 3. Push the Docker image to ECR:
 #       docker push ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference:prod
 #
