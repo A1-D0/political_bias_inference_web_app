@@ -36,7 +36,7 @@
 # - Run 'unset <CRED-NAME>' for each AWS credential to clear the environment variables 
 #   if you need to switch between different IAM users or roles for testing.
 #   One-liner version: 
-#       unset aws_access_key_id aws_secret_access_key aws_session_token aws_profile aws_region aws_default_region
+#       unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_REGION AWS_DEFAULT_REGION
 #
 # How to build the Docker image for production and push to ECR, 
 # run from the ml_inference/ directory, assuming you have AWS IAM user:
@@ -47,7 +47,7 @@
 # 3. Create ECR repo (ignore if repo already exists):
 #       aws ecr create-repository \
 #       --region us-east-1 \
-#       --repository-name ml_inference
+#       --repository-name ml_inference-service
 # 4. Set account id to local shell session:
 #       ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 # 5. Authenticate Docker to ECR: 
@@ -57,11 +57,11 @@
 # 6. Tag the Docker image for ECR:
 #       docker tag us_news_web-ml-inference-service:prod ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference-service:prod
 # 3. Push the Docker image to ECR:
-#       docker push ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference:prod
+#       docker push ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/ml_inference-service:prod
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 14, 2026
-# Date Modified: February 19, 2026
+# Date Modified: February 23, 2026
 # References: Copilot, ChatGPT
 
 # ------------ BUILDER ------------  

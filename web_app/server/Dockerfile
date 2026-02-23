@@ -36,9 +36,16 @@
 # 3. Push the Docker image to ECR:
 #       docker push ${ACCOUNT_ID}.dkr.ecr.<aws_region>.amazonaws.com/usnews-server:prod
 #
+# Note that if you are attempting these commands and they don't work: 
+# - Check whether you are in a ROLE session or IAM USER session in the terminal.
+# - Run 'unset <CRED-NAME>' for each AWS credential to clear the environment variables 
+#   if you need to switch between different IAM users or roles for testing.
+#   One-liner version: 
+#       unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_REGION AWS_DEFAULT_REGION
+#
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026 
-# Date Modified: February 18, 2026 
+# Date Modified: February 23, 2026 
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine
