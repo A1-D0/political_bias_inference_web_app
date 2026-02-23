@@ -37,6 +37,9 @@ else
     echo "RAW_API_KEY not found in environment variables. Service may not function properly."
 fi
 
+# Make the secrets file read-only
+chmod 400 /app/secrets/INFERENCE_API_KEY.txt
+
 # ------ SET UP AUTO S3 MODEL ARTIFACTS DOWNLOADS FOR THE SERVICE ------
 # Check for the presence of the required environment variables for S3 model download
 : "${MODEL_BUCKET:?MODEL_BUCKET is required}"
