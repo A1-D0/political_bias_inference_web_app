@@ -61,7 +61,7 @@
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 14, 2026
-# Date Modified: February 23, 2026
+# Date Modified: February 26, 2026
 # References: Copilot, ChatGPT
 
 # ------------ BUILDER ------------  
@@ -81,7 +81,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY wheels/ /build/wheels 
 COPY requirements.prod.txt .
 
-RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.prod.txt \
+# Force CPU-only for PyTorch to avoid installing large GPU dependencies
+ARG PIP_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG PIP_EXTRA_INDEX_URL=https://pypi.org/simple
+
+# RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.prod.txt \
+#         && cp requirements.prod.txt /build/wheels/requirements.prod.txt
+RUN pip wheel --no-cache-dir \
+        --wheel-dir /build/wheels \
+        --index-url ${PIP_INDEX_URL} \
+        --extra-index-url ${PIP_EXTRA_INDEX_URL} \
+        -r requirements.prod.txt \
         && cp requirements.prod.txt /build/wheels/requirements.prod.txt
 
 # Copy the ml inference service source code and pyproject.toml into the image, 
@@ -108,7 +118,7 @@ COPY --from=builder /build/wheels/ /wheels
 
 # Install production dependencies from the copied wheels (no build tools needed in runtime stage)
 RUN pip install --no-cache-dir --no-index --find-links=/wheels -r /wheels/requirements.prod.txt \
-        && pip install --no-cache-dir /wheels/utils-*.whl \ 
+        && pip install --no-cache-dir /wheels/utils-*.whl \
         && pip install --no-cache-dir --no-index --find-links=/wheels "ml-inference" 
 
 # For downloading S3 model artifacts during container startup
@@ -121,42 +131,3 @@ EXPOSE 5020
 
 WORKDIR /app/src/
 CMD ["gunicorn", "ml_inference_app.app:app", "--bind", "0.0.0.0:5020", "--workers", "2"]
-
-
-# ------------ OLD VERSION OF DOCKERFILE ------------ 
-# FROM python:3.11-slim
-#
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#         build-essential \
-#         g++ \
-#         python3-dev \
-#         && rm -rf /var/lib/apt/lists/*
-#
-# WORKDIR /app
-#
-# # Copy the custom utils wheel and install it. 
-# # This is necessary because the ml inference service depends on the utils package.
-# COPY wheels/ ./tmp/wheels
-# RUN pip install --no-cache-dir ./tmp/wheels/utils-*.whl
-#
-# # Copy the production requirements and install them.
-# COPY dev_requirements.txt .
-# RUN pip install --no-cache-dir -r dev_requirements.txt
-#
-# COPY src/aws_scripts ./src/aws_scripts
-# COPY src/ml_inference_app ./src/ml_inference_app
-# COPY pyproject.toml entrypoint.service.sh . 
-#
-# # Install the ml inference service package to allow us 
-# # to run the service using the command line interface.
-# RUN pip install -e .
-#
-# EXPOSE 5020
-#
-# # Download model artifacts from S3 
-# RUN chmod +x entrypoint.service.sh
-# ENTRYPOINT ["/app/entrypoint.service.sh"]
-#
-# # Run the ml inference service using gunicorn with 2 workers to allow for concurrent requests.
-# WORKDIR /app/src/
-# CMD ["gunicorn", "ml_inference_app.app:app", "--bind", "0.0.0.0:5020", "--workers", "2"]
