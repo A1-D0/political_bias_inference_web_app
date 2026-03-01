@@ -43,6 +43,6 @@ def internal_api_key_verification():
     provided_api_key = provided_api_key.strip()
 
     if provided_api_key != INTERNAL_API_KEY:
-        return jsonify({"error": "Unauthorized access. Invalid API key."}), 403
+        return jsonify({"error": "Unauthorized access. Invalid API key."}), 401
 
     return True 

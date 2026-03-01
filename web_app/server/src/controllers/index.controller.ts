@@ -11,16 +11,13 @@ async function indexController(req: Request, res: Response) {
             <title>News Bias Inference API</title>
             <style>
               body { 
+                  background: #f0f0f0;
                   font-family: Arial; 
-                  max-width: 700px; 
+                  max-width: 900px; 
                   margin: 40px auto; 
               }
-              code { 
-                  background: #f4f4f4; 
-                  padding: 4px 6px; 
-              }
               pre {
-                    background: #f4f4f4;
+                    background: #f0ffff;
                     padding: 12px;
                     overflow-x: auto;
                     white-space: pre-wrap; // Enable wrapping of long lines
@@ -34,7 +31,7 @@ async function indexController(req: Request, res: Response) {
             <p>Built with Python, TypeScript, Docker, AWS App Runner.</p>
 
             <h2>API Overview</h2>
-            <p>REST API for bias inference on U.S. news articles.</p>
+            <p>REST API for political bias inference on U.S. news articles.</p>
             <p>Production ML inference backend deployed on AWS.</p>
             <p>Express gateway &rarr; Flask ML service &rarr; S3 model artifacts.</p>
 
@@ -88,7 +85,7 @@ X-Internal-API-Key: &lt;api_key&gt;
     "error": "Invalid request data"
 }
 </pre>
-            <p>Response status: 403</p>
+            <p>Response status: 401</p>
             <pre>
 {
     "error": "Unauthorized access. Invalid API key."
@@ -108,6 +105,7 @@ X-Internal-API-Key: &lt;api_key&gt;
             <p><b>Prediction:</b></p>
             <pre>
 TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
+
 curl -X POST https://api.osvaldohernandez.dev/predict \\
 -H "Content-Type: application/json" \\
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
