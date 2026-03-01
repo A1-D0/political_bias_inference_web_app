@@ -41,7 +41,9 @@ class PredictModel {
             if (!data || !data.prediction) return false;
 
             const deliverable = { 
-                prediction: data.prediction 
+                prediction: data.prediction,
+                model_version: data.model_version || 'unknown',
+                label_encoder_version: data.label_encoder_version || 'unknown',
             } satisfies MLInferenceResponse;
 
             return deliverable; 

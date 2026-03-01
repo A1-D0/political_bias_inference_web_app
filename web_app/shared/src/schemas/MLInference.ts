@@ -16,6 +16,8 @@ export const MLInferenceRequestSchema = object({
 // ML Inference Response Schema
 export const MLInferenceResponseSchema = object({
     prediction: z.string(),
+    model_version: z.string(),
+    label_encoder_version: z.string(),
 });
 
 export type MLInferenceRequest = z.infer<typeof MLInferenceRequestSchema>["body"];
