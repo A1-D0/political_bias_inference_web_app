@@ -76,7 +76,9 @@ X-Internal-API-Key: &lt;api_key&gt;
             <p>Response status: 200</p>
             <pre>
 {
-    "prediction": "center"
+    "prediction": "center",
+    "model_version": "linear_svc_pipeline_v1",
+    "label_encoder_version": "articles-bypublisher_LabelEncoder_v1"
 }
 </pre>
             <p>Response status: 400</p>
@@ -100,9 +102,9 @@ X-Internal-API-Key: &lt;api_key&gt;
 
             <h2>How to Use The API</h2>
             <p>Use the following curl commands to test the API in the CLI:</p>
-            <p><b>Health Check:</b></p>
+            <p><b>GET /health:</b></p>
             <pre>curl -X GET https://api.osvaldohernandez.dev/health</pre>
-            <p><b>Prediction:</b></p>
+            <p><b>POST /predict:</b></p>
             <pre>
 TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
 
