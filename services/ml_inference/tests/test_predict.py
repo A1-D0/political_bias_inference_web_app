@@ -69,5 +69,5 @@ def test_predict_invalid_api_key(client):
     resp = client.post("/predict", 
                        json={"text": text},
                        headers={"X-Internal-API-Key": "invalid-api-key"})
-    assert resp.status_code == 403
+    assert resp.status_code == 401
 
