@@ -31,24 +31,89 @@ async function indexController(req: Request, res: Response) {
 
           <body>
             <h1>News Bias Inference API</h1>
+            <p>Built with Python, TypeScript, Docker, AWS App Runner.</p>
+
+            <h2>API Overview</h2>
+            <p>REST API for bias inference on U.S. news articles.</p>
             <p>Production ML inference backend deployed on AWS.</p>
+            <p>Express gateway &rarr; Flask ML service &rarr; S3 model artifacts.</p>
+
+            <p></p>
 
             <h2>Endpoints</h2>
-            <ul>
-              <li><code>GET /health</code></li>
-              <li><code>POST /predict</code></li>
-            </ul>
+            <h3>GET /</h3>
+            <p>Landing page with API overview and usage instructions (i.e., this page).</p>
 
-            <h2>Example Requests</h2>
-            <p>Use the following curl commands to test the API in the CLI:</p>
-            <pre>curl -X GET https://api.osvaldohernandez.dev/health</pre>
+            <h3>GET /health</h3>
+            <p>Health check endpoint. Returns JSON with service status and uptime.</p>
+            <p><b>Response:</b></p>
+            <p>Response status: 200</p>
             <pre>
-curl -X POST https://api.osvaldohernandez.dev/predict \\
--H "Content-Type: application/json" \\
--d "{\\"text\\":\\"President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered.\\"}"
+{
+    "status": "ok",
+    "service": "server",
+    "timestamp": "2026-03-01T04:33:40.199Z",
+    "uptime_seconds": 28400
+}
 </pre>
 
-            <p>Built with Python, TypeScript, Docker, AWS App Runner.</p>
+            <h3>POST /predict</h3>
+            <p>Accepts JSON with a news article text and returns bias inference results.</p>
+            <p><b>Required headers:</b></p>
+            <pre>
+Content-Type: application/json
+X-Internal-API-Key: &lt;api_key&gt;
+</pre>
+            <p><b>Request body:</b></p>
+            <pre>
+{
+    "text": "Full text of a news article (max 3000 chars)"
+}
+</pre>
+            <p><b>Contraints:</b></p>
+            <ul>
+               <li>Input text should ideally be a news article or a portion of one (max 3000 chars).</li>
+                <li>API is designed to handle news articles of U.S. contexts.</li>
+            </ul>
+            <p><b>Response:</b></p>
+            <p>Response status: 200</p>
+            <pre>
+{
+    "prediction": "center"
+}
+</pre>
+            <p>Response status: 400</p>
+            <pre>
+{
+    "error": "Invalid request data"
+}
+</pre>
+            <p>Response status: 403</p>
+            <pre>
+{
+    "error": "Unauthorized access. Invalid API key."
+}
+</pre>
+            <p>Response status: 502</p>
+            <pre>
+{
+    "error": "Bad Gateway Error"
+}
+</pre>
+
+            <h2>How to Use The API</h2>
+            <p>Use the following curl commands to test the API in the CLI:</p>
+            <p><b>Health Check:</b></p>
+            <pre>curl -X GET https://api.osvaldohernandez.dev/health</pre>
+            <p><b>Prediction:</b></p>
+            <pre>
+TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
+curl -X POST https://api.osvaldohernandez.dev/predict \\
+-H "Content-Type: application/json" \\
+-d "$(jq -n --arg text "$TEXT" '{text: $text}')"
+</pre>
+
+            <p>Note that the API is designed to handle news articles of U.S. contexts. Additionally, the text input should ideally be a news article or a portion of one (max 3000 chars) for best results.</p>
 
             <h2> Article Example</h2>
             <h3>Air Force One returns to Washington area due to minor electrical issue, White House says</h3>
