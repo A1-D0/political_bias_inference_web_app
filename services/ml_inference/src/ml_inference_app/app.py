@@ -111,6 +111,10 @@ try:
 except Exception as e:
     raise ValueError(f"Failed to load label encoder from {LABEL_ENCODER_PATH}: {str(e)}")
 
+# Extract version from filename, e.g., "linear_svc_pipeline_v1"
+MODEL_VERSION = MODEL_FILE.split(".")[0]  
+LABEL_ENCODER_VERSION = LABLE_ENCODER_FILE.split(".")[0]
+
 app = Flask(__name__)
 
 print(f"ML Inference Service is running on http://{HOST}:{PORT}")
@@ -181,7 +185,10 @@ def predict():
         if output_label[0] == "least":
             output_label[0] = "center"
 
-        return jsonify({"prediction": output_label[0]}), 200
+        return jsonify({"prediction": output_label[0],
+                        "model_version": MODEL_VERSION, 
+                        "label_encoder_version": LABEL_ENCODER_VERSION
+                        }), 200
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 

@@ -5,7 +5,7 @@
     *
     * Author: Osvaldo Hernandez-Segura
     * Date Created: February 4, 2026
-    * Date Modified: February 7, 2026
+    * Date Modified: March 2, 2026
     * References: Copilot, ChatGPT, GeeksForGeeks, StackOverflow
 */
 import dotenv from 'dotenv';
@@ -68,7 +68,11 @@ function mockPredict() {
             ok: true,
             status: 200,
             json: async () => (
-                { prediction: "center" } satisfies MLInferenceResponse
+                { 
+                    prediction: "center",
+                    model_version: "model_v1.0.0",
+                    label_encoder_version: "label_encoder_v1.0.0"
+                } satisfies MLInferenceResponse
             )
         } as any; 
     }) as jest.Mock;
