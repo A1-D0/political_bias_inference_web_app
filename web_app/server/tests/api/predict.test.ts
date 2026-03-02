@@ -7,7 +7,7 @@
     *
     * Author: Osvaldo Hernandez-Segura
     * Date Created: February 1, 2026
-    * Date Modified: February 7, 2026
+    * Date Modified: March 2, 2026
     * References: Copilot, ChatGPT, GeeksForGeeks, StackOverflow
 */
 import request from 'supertest';
@@ -35,6 +35,8 @@ describe("POST /predict", () => {
             .send({ text: "This is a test input for prediction." });
         
         expect(res.body).toHaveProperty('prediction');
+        expect(res.body).toHaveProperty('model_version');
+        expect(res.body).toHaveProperty('label_encoder_version');
         expect(res.status).toBe(200);
     });
 
