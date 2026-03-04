@@ -28,8 +28,8 @@
 # run the following commands, assuming AWS CLI is installed
 # and the IAM user and US-News-Web-App can be assumed to exist in the terminal 
 # (check AWS IAM 'Roles' and 'Permissions'): 
-#   1. chmod +x src/aws_scripts/aws_export_role.sh
-#   2. source src/aws_scripts/aws_export_role.sh
+#   1. chmod +x us_news_web/aws_scripts/aws_export_role.sh
+#   2. source us_news_web/aws_scripts/aws_export_role.sh
 #
 # Note that if you are attempting these commands and they don't work: 
 # - Check whether you are in a ROLE session or IAM USER session in the terminal.
@@ -61,7 +61,7 @@
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 14, 2026
-# Date Modified: February 26, 2026
+# Date Modified: March 4, 2026
 # References: Copilot, ChatGPT
 
 # ------------ BUILDER ------------  
