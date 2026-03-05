@@ -1,0 +1,14 @@
+[
+    {
+        "name": "server",
+        "service_arn": "ARN_APP_RUNNER_SERVER",
+        "ecr_repo_uri": "ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/server-repo",
+        "tag": "prod"
+    },
+    {
+        "name": "ml",
+        "service_arn": "ARN_APP_RUNNER_ML",
+        "ecr_repo_uri": "ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/ml-repo",
+        "tag": "prod"
+    }
+]
