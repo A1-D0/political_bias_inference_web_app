@@ -17,6 +17,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ml_inference_service_dev
     environment:
+      - SECRETS_DIR=/app/secrets
+      - RAW_API_KEY=actual-api-key-for-development
       - HOST=0.0.0.0
       - PORT=5020
       - MODELS_DIR=/app/src/ml_inference_app/models
@@ -28,7 +30,6 @@ services:
       - "5020"
     volumes:
       - ./services/ml_inference/src/ml_inference_app/models/:/app/src/ml_inference_app/models/:ro
-      - ./services/ml_inference/secrets/:/app/secrets/:ro
 
   server:
     build:
@@ -36,13 +37,13 @@ services:
       dockerfile: ./server/Dockerfile.dev
     container_name: web_app_server_dev
     environment:
+      - SECRETS_DIR=/app/secrets
+      - RAW_API_KEY=actual-api-key-for-development
       - PORT=3000
       - INFERENCE_API_URL=http://ml-inference-service:5020
       - INFERENCE_API_KEY=/app/secrets/INTERNAL_API_KEY.txt
     ports:
       - "3000:3000"
-    volumes:
-      - ./services/ml_inference/secrets/:/app/secrets/:ro
     depends_on:
       - ml-inference-service
 
