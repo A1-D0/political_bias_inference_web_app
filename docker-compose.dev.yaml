@@ -1,16 +1,13 @@
 # Development Docker Compose configuration file
 #
 # How to run:
-# Ensure you are in the project root directory and execute the following command 
-# to start the development environment:
-# docker compose -f ./docker-compose.dev.yaml up -d --build
+#   Execute the following command from the project root directory to build 
+#   and run the ML service and server containers in development mode:
+#     docker compose -f ./docker-compose.dev.yaml up -d --build
 #
 # Author: Osvaldo Hernandez-Segura
-#
 # Date Created: January 22, 2026
-#
-# Last Modified: February 8, 2026
-#
+# Last Modified: March 5, 2026
 # References: Copilot, ChatGPT, Docker Documentation
 
 services:
@@ -19,14 +16,14 @@ services:
       context: ./services/ml_inference/
       dockerfile: Dockerfile.dev
     container_name: ml_inference_service_dev
-    env_file: 
-      - ./services/ml_inference/src/ml_inference_app/.env
     environment:
       - HOST=0.0.0.0
+      - PORT=5020
       - MODELS_DIR=/app/src/ml_inference_app/models
-      - MODEL_FILE=linear_svc_pipeline_v1.joblib
+      - MODEL_FILE=dummy_model_pipeline_v1.joblib
       - LABEL_ENCODER_FILE=articles-bypublisher_LabelEncoder_v1.joblib
       - INTERNAL_API_KEY=/app/secrets/INTERNAL_API_KEY.txt
+      - DEBUG_MODE=1
     expose:
       - "5020"
     volumes:
@@ -38,9 +35,8 @@ services:
       context: ./web_app/
       dockerfile: ./server/Dockerfile.dev
     container_name: web_app_server_dev
-    env_file: 
-      - ./web_app/server/.env
     environment:
+      - PORT=3000
       - INFERENCE_API_URL=http://ml-inference-service:5020
       - INFERENCE_API_KEY=/app/secrets/INTERNAL_API_KEY.txt
     ports:
