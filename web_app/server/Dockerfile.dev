@@ -1,27 +1,35 @@
 # This Dockerfile is for the development environment of a the 
-# server-side of the US News web application.
+# server-side of the web application.
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: January 22, 2026
-# Date Modified: January 22, 2026
+# Date Modified: March 5, 2026
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine
 
+WORKDIR /app
+
+# Install npm dependencies for the shared package and then build the shared package
+WORKDIR /app/shared
+COPY shared/package.json shared/package-lock.json .
+RUN npm ci
+
+COPY shared/src ./src/
+COPY shared/tsconfig.json ./tsconfig.json
+RUN npm run build
+
+# Install npm dependencies for the server
 WORKDIR /app/server
+COPY server/src ./src/
+COPY server/tsconfig.json ./tsconfig.json 
 COPY server/package.json server/package-lock.json .
 RUN npm ci
 
-# note that for the shared/schema directory structure,
-# the docker compose file will be responsible for opening 
-# accesses via volumes the rest of the dependencies of the 
-# server files.
+COPY server/entrypoint.dev.sh ./entrypoint.dev.sh
+RUN chmod +x ./entrypoint.dev.sh
+ENTRYPOINT ["/app/server/entrypoint.dev.sh"]
 
-COPY server/src ./src
-
-WORKDIR /app
-COPY shared ./shared 
-
-WORKDIR /app/server
 EXPOSE 3000 
+
 CMD ["npm", "run", "dev"]

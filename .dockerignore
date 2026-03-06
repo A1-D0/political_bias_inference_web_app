@@ -1,0 +1,7 @@
+# ignore Node.js dependencies
+node_modules/
+node_modules/**
+
+# ignore dist folder
+dist/
+dist/**
