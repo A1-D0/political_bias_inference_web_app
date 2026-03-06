@@ -2,13 +2,13 @@
 
 # This script is the entrypoint for the server container. 
 # It sets up the necessary environment and starts the server.
-# It checks for the presence of the ML_API_KEY environment variable, 
+# It requires the RAW_API_KEY environment variable to be set, 
+# which is the API key for the ML inference service,
 # and if it exists, it writes it to a file that the server can read.
-# Finally, it starts the server using Node.js.
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026
-# Date Modified: February 12, 2026
+# Date Modified: March 5, 2026
 # References: Copilot, ChatGPT
 
 # Exit immediately if a command exits with a non-zero status, 

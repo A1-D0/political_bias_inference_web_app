@@ -2,6 +2,9 @@
 
 # This script is the entrypoint for the ML service or server container. 
 # It sets up the necessary environment and starts the container.
+# It requires the RAW_API_KEY environment variable to be set, 
+# which is the API key for the ML inference service,
+# and if it exists, it writes it to a file that the server can read.
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: March 5, 2026 
