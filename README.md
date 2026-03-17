@@ -54,6 +54,8 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 13. [System Constraints and limitations](#system-constraints-and-limitations)
 14. [Failure Modes and Mitigation Strategies](#failure-modes-and-mitigation-strategies)
 15. [Future work and improvements](#future-work-and-improvements)
+16. [Notes](#notes)
+17. [Sources](#sources)
 
 ## Tech stack
 - Node.js (Express) with TypeScript
@@ -335,9 +337,14 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 - Implementing a feedback mechanism for users to provide input on the accuracy of the predictions, which could be used to further improve the model over time.
 - Adding queues and asynchronous processing to handle higher loads and improve response times for inference requests (i.e., event-driven architecture).
 
+## Notes
+1. The ML artifacts, such as the classification model and label encoder, were trained and evaluated in another project using the Hyperpartisan Training Dataset (2018) and are not included in this repository. For the sake of this project's focus, the code for training/evaluation is not provided. 
+2. The current live model is a Linear SVC pipeline with sentence-transformer text embedder, trained to classify articles into five bias categories: left, left-center, center, right-center, and right. The dummy model included in this repository is a trivial model to be used as a demo only. The label encoder is a simple mapping of the five ordinal labels to integers.
+
 ## Sources
 1. Air Force One returns to Washington area due to minor electrical issue, White House says. Associated Press News (2026). [Link](https://apnews.com/article/trump-air-force-one-electrical-issue-c3044b52b792a8c12f6211718d94f8fe)
 2. AWS Documentation. Amazon Web Services (2026). [Link](https://aws.amazon.com/documentation/)
 3. Boto3 Documentation. Amazon Web Services (2026). [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
-4. Hyperpartisan Training Dataset. Zenodo (2018). [Link](https://doi.org/10.5281/zenodo.1489920)
+4. Hugging Face Sentence Transformers. Hugging Face (2026). [Link](https://huggingface.co/sentence-transformers)
+5. Hyperpartisan Training Dataset. Zenodo (2018). [Link](https://doi.org/10.5281/zenodo.1489920)
 
