@@ -27,7 +27,7 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
 ```
 
-## High-level Architecture
+## High-level architecture
 - The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
 - Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
 - The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
@@ -41,21 +41,19 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 ## Table of contents
 1. [Description](#description)
 2. [Why?](#why)
-3. [Try the Live Demo](#try-the-live-demo)
-4. [High-Level Architecture](#high-level-architecture)
+3. [Try the live Demo](#try-the-live-demo)
+4. [High-level architecture](#high-level-architecture)
 5. [Tech stack](#tech-stack)
-6. [Deployment Architecture](#deployment-architecture)
-7. [Request-Response Flow](#request-response-flow)
+6. [Deployment flow](#deployment-flow)
+7. [Request-Response flow](#request-response-flow)
 8. [Endpoints](#endpoints)
 9. [System requirements](#system-requirements)
-10. [How to Run Locally](#how-to-run-locally)
-11. [Directory Structure](#directory-structure)
+10. [How to run locally](#how-to-run-locally)
+11. [Directory structure](#directory-structure)
 12. [Design choices and tradeoffs](#design-choices-and-tradeoffs)
-13. [System Constraints and limitations](#system-constraints-and-limitations)
-14. [Failure Modes and Mitigation Strategies](#failure-modes-and-mitigation-strategies)
-15. [Future work and improvements](#future-work-and-improvements)
-16. [Notes](#notes)
-17. [Sources](#sources)
+13. [Future work and improvements](#future-work-and-improvements)
+14. [Notes](#notes)
+15. [Sources](#sources)
 
 ## Tech stack
 - Node.js (Express) with TypeScript
