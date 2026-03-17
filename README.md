@@ -110,6 +110,8 @@ Landing page with API overview and usage instructions.
 Response status: 200
 Response could be either a simple HTML page or a JSON response with HTML code for the landing page.
 
+</details>
+
 <details>
     <summary>GET /health</summary>
 
@@ -125,6 +127,8 @@ Response status: 200
     "uptime_seconds": 28400
 }
 ```
+
+</details>
 
 <details>
     <summary>POST /predict</summary>
@@ -177,6 +181,8 @@ Response status: 502
     "error": "Bad Gateway Error"
 }
 ```
+
+</details>
 
 ## Requirements
 For running the project locally in development mode, you will need to have the following installed:
@@ -263,6 +269,8 @@ The server and ML inference service are deployed as separate services on AWS App
 **Tradeoffs**
 - Added complexity in deployment setup, such as setting up resource specifications for each service, managing inter-service communication, and handling potential latency between services.
 - Increased latency for inference requests due to the need for inter-service communication, which may affect the overall response time of the API. 
+
+</details>
     
 <details>
     <summary>Model artifcats management</summary>
@@ -278,6 +286,8 @@ Model artifacts are loaded from AWS S3 at startup of the ML inference service.
 - Requires up-front setup of the S3 download process, adding to the complexity of the Dockerfile and entrypoint scripts for the ML inference service.
 - Causes added latency at startup due to the need to download the model artifacts from S3, which may affect the time it takes for the ML inference service to become available after deployment or restart. 
 
+</details>
+
 <details>
     <summary>Logging and error handling</summary>
 
@@ -292,6 +302,8 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 **Tradeoffs**
 - Storage costs can increase over time as logs accumulate, especially if the system experiences a high volume of requests or errors. 
 - Each AWS App Runner instance deployed has an independent log, potentially making it more difficult to analyze system performance during errors and failures; thus, logs would need to be aggregated and correlated across related instances to get a complete picture of the system's behavior during those events.
+
+</details>
 
 <details>
     <summary>Deployment cost control</summary>
@@ -310,6 +322,8 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 - The system is only available during specified hours, limiting access to users and user experience outside of those hours. 
 - EventBridge requires additional setup and management, especially with the addition of Lambda functions, adding to the upfront complexity and time to deploy the system. 
 - CloudWatch logs may be deleted before they can be analyzed for long-term performance insights, hindering debugging and optimization efforts if not properly managed. 
+
+</details>
 
 ## Future work and improvements.
     - Implementing a CI/CD pipeline for automated testing and deployment.
