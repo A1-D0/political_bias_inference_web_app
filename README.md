@@ -254,7 +254,7 @@ docker compose -f ./docker-compose.dev.yaml up -d --build
         └── tsconfig.json
 ```
 
-## Design choices and tradeoffs. 
+## Design choices and tradeoffs
 
 <details>
     <summary>Service separation</summary>
@@ -325,18 +325,18 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 
 </details>
 
-## Future work and improvements.
-    - Implementing a CI/CD pipeline for automated testing and deployment.
-    - Implementing a frontend interface for users to interact with the API without the need for curl commands or Postman-like tools.
-    - Adding user authentication and rate limiting to the API to prevent abuse and ensure fair usage.
-    - Expanding the model to handle more nuanced bias classifications, such as Libertarian or Independent political biases, or to support additional languages beyond English.
-    - Including model options from which users can choose when making inference requests (e.g., allowing users to select between different model versions or architectures).
-    - Implementing a feedback mechanism for users to provide input on the accuracy of the predictions, which could be used to further improve the model over time.
-    - Adding queues and asynchronous processing to handle higher loads and improve response times for inference requests (i.e., event-driven architecture).
+## Future work and improvements
+- Implementing a CI/CD pipeline for automated testing and deployment.
+- Implementing a frontend interface for users to interact with the API without the need for curl commands or Postman-like tools.
+- Adding user authentication and rate limiting to the API to prevent abuse and ensure fair usage.
+- Expanding the model to handle more nuanced bias classifications, such as Libertarian or Independent political biases, or to support additional languages beyond English.
+- Including model options from which users can choose when making inference requests (e.g., allowing users to select between different model versions or architectures).
+- Implementing a feedback mechanism for users to provide input on the accuracy of the predictions, which could be used to further improve the model over time.
+- Adding queues and asynchronous processing to handle higher loads and improve response times for inference requests (i.e., event-driven architecture).
 
 ## Sources
-Air Force One returns to Washington area due to minor electrical issue, White House says. Associated Press News (2026). [Link](https://apnews.com/article/trump-air-force-one-electrical-issue-c3044b52b792a8c12f6211718d94f8fe)
-AWS Documentation. Amazon Web Services (2026). [Link](https://aws.amazon.com/documentation/)
-Boto3 Documentation. Amazon Web Services (2026). [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
-Hyperpartisan Training Dataset. Zenodo (2018). [Link](https://doi.org/10.5281/zenodo.1489920)
+1. Air Force One returns to Washington area due to minor electrical issue, White House says. Associated Press News (2026). [Link](https://apnews.com/article/trump-air-force-one-electrical-issue-c3044b52b792a8c12f6211718d94f8fe)
+2. AWS Documentation. Amazon Web Services (2026). [Link](https://aws.amazon.com/documentation/)
+3. Boto3 Documentation. Amazon Web Services (2026). [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
+4. Hyperpartisan Training Dataset. Zenodo (2018). [Link](https://doi.org/10.5281/zenodo.1489920)
 
