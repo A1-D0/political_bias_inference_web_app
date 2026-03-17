@@ -3,7 +3,7 @@
 ## Description
 An experimental political bias inference web API that predicts the political bias of U.S.-context articles using machine learning.
 
-## **Why?**
+## Why?
 News consumers may be unaware of the political bias of the news sources they consume, which can lead to a skewed perception of current events and contribute to political polarization. This web app aims to provide users with insights into the political bias of articles, helping them make more informed decisions about the news they consume and encouraging critical thinking about media sources.
 
 This project was inspired by platforms such as AllSides and Ground News, which provide bias ratings of media outlets in U.S. contexts. What makes this project unique is that it predicts bias at the **article level** and for **any U.S.-context text**, rather than assigning bias only to news sources. 
@@ -39,21 +39,21 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 </p>
 
 ## Table of contents
-- [Description](#description)
-- [Why?](#why)
-- [Try the Live Demo](#try-the-live-demo)
-- [High-Level Architecture](#high-level-architecture)
-- [Tech stack](#tech-stack)
-- [Deployment Architecture](#deployment-architecture)
-- [Request-Response Flow](#request-response-flow)
-- [Endpoints](#endpoints)
-- [Requirements](#requirements)
-- [How to Run Locally](#how-to-run-locally)
-- [Directory Structure](#directory-structure)
-- [Design choices and tradeoffs](#design-choices-and-tradeoffs)
-- [System Constraints and limitations](#system-constraints-and-limitations)
-- [Failure Modes and Mitigation Strategies](#failure-modes-and-mitigation-strategies)
-- [Future work and improvements](#future-work-and-improvements)
+1. [Description](#description)
+2. [Why?](#why)
+3. [Try the Live Demo](#try-the-live-demo)
+4. [High-Level Architecture](#high-level-architecture)
+5. [Tech stack](#tech-stack)
+6. [Deployment Architecture](#deployment-architecture)
+7. [Request-Response Flow](#request-response-flow)
+8. [Endpoints](#endpoints)
+9. [System requirements](#system-requirements)
+10. [How to Run Locally](#how-to-run-locally)
+11. [Directory Structure](#directory-structure)
+12. [Design choices and tradeoffs](#design-choices-and-tradeoffs)
+13. [System Constraints and limitations](#system-constraints-and-limitations)
+14. [Failure Modes and Mitigation Strategies](#failure-modes-and-mitigation-strategies)
+15. [Future work and improvements](#future-work-and-improvements)
 
 ## Tech stack
 - Node.js (Express) with TypeScript
@@ -79,10 +79,6 @@ The deployment flow of the web app is as follows:
 </p>
 
 ## Request-Response flow
-- Text describing the flow of a request from the frontend to the backend and back, 
-  including error handling.
-- Diagram illustrating the request-response flow, including how errors are handled and logged.
-
 The Request-Response flow of the web app for a "happy path" is as follows:
 1. The user enacts the POST /predict endpoint by sending a request with the text of a news article to the URL. 
 2. Cloudflare receives the request and forwards it to the backend API hosted on AWS App Runner.
@@ -183,10 +179,10 @@ Response status: 502
 
 </details>
 
-## Requirements
+## System requirements
 For running the project locally in development mode, you will need to have the following installed:
 - Docker Desktop
-The Node.js requirements are stored in the [package.json](./web_app/server/package.json) file, and the Python requirements are stored in the [requirements.prod.txt](./services/ml_inference/requirements.prod.txt) file.
+- The Node.js requirements are stored in the [package.json](./web_app/server/package.json) file, and the Python requirements are stored in the [requirements.prod.txt](./services/ml_inference/requirements.prod.txt) file
 
 ## How to run locally
 Ensure Docker Desktop is installed and running on your machine. Then, follow these steps:
@@ -202,7 +198,7 @@ cd political_bias_inference_web_app
 ```bash
 docker compose -f ./docker-compose.dev.yaml up -d --build
 ```
-4. The API will be available at `http://localhost:3000` (the ML inference service will not be available).
+4. The API will be available at `http://localhost:3000` (the ML inference service will not be accessible, but will run).
 5. The curl commands to test the API endpoints are provided in the [Try the Live Demo](#try-the-live-demo) section above. You can use those same commands to test the API locally, just make sure to change the URL from `https://api.osvaldohernandez.dev` to `http://localhost:3000`. Alternatively, you can use tools like Postman to send requests to the API.
 
 ## Directory structure
@@ -291,7 +287,6 @@ Model artifacts are loaded from AWS S3 at startup of the ML inference service.
     <summary>Logging and error handling</summary>
 
 ### Logging and error handling
-- Logging and error handling: How we handle logging and errors, and why we chose that approach.
 Logging is handled using AWS CloudWatch, where all logs from the backend API, ML inference service, and deployment infrastructure are collected and stored for monitoring and debugging purposes. Error handling is implemented in both services to catch and log any errors that occur during request processing, model inference, or inter-service communication. 
 
 > **Reasoning**
@@ -308,7 +303,6 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
     <summary>Deployment cost control</summary>
 
 ### Deployment cost control
-- Cost control: How we manage costs, especially in relation to the ML inference service and cloud deployment.
 - AWS App Runner instances for the backend API and ML inference service are automatically started and stopped during specified hours using AWS EventBridge (i.e., cron jobs) with AWS Lambda functions.
 - AWS CloudWatch logs are set to auto-delete after a specified period to control storage costs.
 
