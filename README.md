@@ -17,7 +17,6 @@ Link to the live demo: [Live Demo](https://api.osvaldohernandez.dev)
 GET /health:
 ```bash
 curl -X GET https://api.osvaldohernandez.dev/health
-POST /predict:
 ```
 POST /predict:
 ```bash
@@ -29,11 +28,11 @@ curl -X POST https://api.osvaldohernandez.dev/predict \\
 ```
 
 ## High-Level Architecture
-The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
-Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
-The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
-The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which then sends the response to the client. 
-Logs from all services, including error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
+- The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
+- Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
+- The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
+- The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which then sends the response to the client. 
+- Logs from all services, including error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
 
 <p align="center">
   <img alt="High-level architecture of the political bias inference web app" src="./docs/diagrams/web_app_high_level_architecture.svg">
@@ -262,13 +261,13 @@ docker compose -f ./docker-compose.dev.yaml up -d --build
 ### Service separation
 The server and ML inference service are deployed as separate services on AWS App Runner.
 
-**Reasoning**
-- Allows independent scaling of each service; otherwise, unnecessary resources would be allocated, and costs would increase significantly, especially for the ML inference service, which is more resource-intensive than the backend API.
-- Modularizes and separates concerns, making it easier to maintain and update each service independently. For example, the ML inference service can be updated with new models or optimizations without affecting the backend API, and vice versa.
+> **Reasoning**
+> - Allows independent scaling of each service; otherwise, unnecessary resources would be allocated, and costs would increase significantly, especially for the ML inference service, which is more resource-intensive than the backend API.
+> - Modularizes and separates concerns, making it easier to maintain and update each service independently. For example, the ML inference service can be updated with new models or optimizations without affecting the backend API, and vice versa.
 
-**Tradeoffs**
-- Added complexity in deployment setup, such as setting up resource specifications for each service, managing inter-service communication, and handling potential latency between services.
-- Increased latency for inference requests due to the need for inter-service communication, which may affect the overall response time of the API. 
+> **Tradeoffs**
+> - Added complexity in deployment setup, such as setting up resource specifications for each service, managing inter-service communication, and handling potential latency between services.
+> - Increased latency for inference requests due to the need for inter-service communication, which may affect the overall response time of the API. 
 
 </details>
     
@@ -278,13 +277,13 @@ The server and ML inference service are deployed as separate services on AWS App
 ### Model artifacts management
 Model artifacts are loaded from AWS S3 at startup of the ML inference service. 
 
-**Reasoning**
-- Ensures the models are available at runtime only and keep the Docker image as small as possible. Alternatively, the model artifacts could have been baked into the Docker image of the ML inference service for model-loading convenience; however, the image would have been significantly larger, and any model update would have required a new image build and deployment, which would have increased the deployment time and model selection complexity.
-- Allows for easier model installations on the AWS App Runner instances for the ML inference service, as the specified models can be downloaded from S3 at startup without the need for additional setup steps or manual intervention. 
+> **Reasoning**
+> - Ensures the models are available at runtime only and keep the Docker image as small as possible. Alternatively, the model artifacts could have been baked into the Docker image of the ML inference service for model-loading convenience; however, the image would have been significantly larger, and any model update would have required a new image build and deployment, which would have increased the deployment time and model selection complexity.
+> - Allows for easier model installations on the AWS App Runner instances for the ML inference service, as the specified models can be downloaded from S3 at startup without the need for additional setup steps or manual intervention. 
 
-**Tradeoffs**
-- Requires up-front setup of the S3 download process, adding to the complexity of the Dockerfile and entrypoint scripts for the ML inference service.
-- Causes added latency at startup due to the need to download the model artifacts from S3, which may affect the time it takes for the ML inference service to become available after deployment or restart. 
+> **Tradeoffs**
+> - Requires up-front setup of the S3 download process, adding to the complexity of the Dockerfile and entrypoint scripts for the ML inference service.
+> - Causes added latency at startup due to the need to download the model artifacts from S3, which may affect the time it takes for the ML inference service to become available after deployment or restart. 
 
 </details>
 
@@ -295,13 +294,13 @@ Model artifacts are loaded from AWS S3 at startup of the ML inference service.
 - Logging and error handling: How we handle logging and errors, and why we chose that approach.
 Logging is handled using AWS CloudWatch, where all logs from the backend API, ML inference service, and deployment infrastructure are collected and stored for monitoring and debugging purposes. Error handling is implemented in both services to catch and log any errors that occur during request processing, model inference, or inter-service communication. 
 
-**Reasoning**
-- Centralized logging in AWS CloudWatch allows for easier monitoring and debugging of the entire system, as all logs are stored in one place and can be easily accessed and analyzed. 
-- Long-term log storage in CloudWatch allows for analysis of and update on system performance, even after a service fails or is restarted.
+> **Reasoning**
+> - Centralized logging in AWS CloudWatch allows for easier monitoring and debugging of the entire system, as all logs are stored in one place and can be easily accessed and analyzed. 
+> - Long-term log storage in CloudWatch allows for analysis of and update on system performance, even after a service fails or is restarted.
 
-**Tradeoffs**
-- Storage costs can increase over time as logs accumulate, especially if the system experiences a high volume of requests or errors. 
-- Each AWS App Runner instance deployed has an independent log, potentially making it more difficult to analyze system performance during errors and failures; thus, logs would need to be aggregated and correlated across related instances to get a complete picture of the system's behavior during those events.
+> **Tradeoffs**
+> - Storage costs can increase over time as logs accumulate, especially if the system experiences a high volume of requests or errors. 
+> - Each AWS App Runner instance deployed has an independent log, potentially making it more difficult to analyze system performance during errors and failures; thus, logs would need to be aggregated and correlated across related instances to get a complete picture of the system's behavior during those events.
 
 </details>
 
@@ -313,15 +312,15 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 - AWS App Runner instances for the backend API and ML inference service are automatically started and stopped during specified hours using AWS EventBridge (i.e., cron jobs) with AWS Lambda functions.
 - AWS CloudWatch logs are set to auto-delete after a specified period to control storage costs.
 
-**Reasoning**
-- Auto-deploy and auto-stop of the AWS App Runner instances reduces runtime costs compared to a 24/7 service availability.
-- EventBridge provides a reliable way to dynamically manage the availability of the services based on a schedule, allowing for cost savings while still providing access to the API during specified hours.
-- Auto-deletion of logs in AWS CloudWatch helps manage storage costs over time, especially if the system experiences a high volume of logs in a short period. 
+> **Reasoning**
+> - Auto-deploy and auto-stop of the AWS App Runner instances reduces runtime costs compared to a 24/7 service availability.
+> - EventBridge provides a reliable way to dynamically manage the availability of the services based on a schedule, allowing for cost savings while still providing access to the API during specified hours.
+> - Auto-deletion of logs in AWS CloudWatch helps manage storage costs over time, especially if the system experiences a high volume of logs in a short period. 
 
-**Tradeoffs**
-- The system is only available during specified hours, limiting access to users and user experience outside of those hours. 
-- EventBridge requires additional setup and management, especially with the addition of Lambda functions, adding to the upfront complexity and time to deploy the system. 
-- CloudWatch logs may be deleted before they can be analyzed for long-term performance insights, hindering debugging and optimization efforts if not properly managed. 
+> **Tradeoffs**
+> - The system is only available during specified hours, limiting access to users and user experience outside of those hours. 
+> - EventBridge requires additional setup and management, especially with the addition of Lambda functions, adding to the upfront complexity and time to deploy the system. 
+> - CloudWatch logs may be deleted before they can be analyzed for long-term performance insights, hindering debugging and optimization efforts if not properly managed. 
 
 </details>
 
