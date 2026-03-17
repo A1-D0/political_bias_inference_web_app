@@ -295,7 +295,7 @@ Model artifacts are loaded from AWS S3 at startup of the ML inference service.
     <summary>Logging and error handling</summary>
 
 ### Logging and error handling
-Logging is handled using AWS CloudWatch, where all logs from the backend API, ML inference service, and deployment infrastructure are collected and stored for monitoring and debugging purposes. Error handling is implemented in both services to catch and log any errors that occur during request processing, model inference, or inter-service communication. 
+Logging is handled using AWS CloudWatch, where all logs from the backend API, ML inference service, and system infrastructure are collected and stored for monitoring and debugging purposes. Error handling is implemented in both services to catch and log any errors that occur during request processing, model inference, or inter-service communication. 
 
 > **Reasoning**
 > - Centralized logging in AWS CloudWatch faciliates monitoring, logs access, and debugging of the entire system.
