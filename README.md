@@ -27,7 +27,7 @@ curl -X POST https://api.osvaldohernandez.dev/predict \\
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
 ```
 
-## High-Level Architecture
+## High-level Architecture
 - The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
 - Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
 - The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
@@ -67,7 +67,7 @@ curl -X POST https://api.osvaldohernandez.dev/predict \\
 - AWS CloudWatch
 - Cloudflare (DNS management)
 
-## Deployment Flow
+## Deployment flow
 The deployment flow of the web app is as follows:
 1. Local code is version controlled using Git and pushed to GitHub.
 2. The code is tested using GitHub Actions to ensure that all tests pass and the code is ready for deployment.
@@ -78,7 +78,7 @@ The deployment flow of the web app is as follows:
   <img alt="Deployment architecture of the political bias inference web app" src="./docs/diagrams/web_app_deployment_flow.svg">
 </p>
 
-## Request-Response Flow
+## Request-Response flow
 - Text describing the flow of a request from the frontend to the backend and back, 
   including error handling.
 - Diagram illustrating the request-response flow, including how errors are handled and logged.
@@ -188,7 +188,7 @@ For running the project locally in development mode, you will need to have the f
 - Docker Desktop
 The Node.js requirements are stored in the [package.json](./web_app/server/package.json) file, and the Python requirements are stored in the [requirements.prod.txt](./services/ml_inference/requirements.prod.txt) file.
 
-## How to Run Locally
+## How to run locally
 Ensure Docker Desktop is installed and running on your machine. Then, follow these steps:
 1. Clone the repository:
 ```bash
@@ -205,7 +205,7 @@ docker compose -f ./docker-compose.dev.yaml up -d --build
 4. The API will be available at `http://localhost:3000` (the ML inference service will not be available).
 5. The curl commands to test the API endpoints are provided in the [Try the Live Demo](#try-the-live-demo) section above. You can use those same commands to test the API locally, just make sure to change the URL from `https://api.osvaldohernandez.dev` to `http://localhost:3000`. Alternatively, you can use tools like Postman to send requests to the API.
 
-## Directory Structure
+## Directory structure
 ```bash
 .
 ├── aws_scripts
