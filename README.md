@@ -266,12 +266,12 @@ docker compose -f ./docker-compose.dev.yaml up -d --build
 The server and ML inference service are deployed as separate services on AWS App Runner.
 
 > **Reasoning**
-> - Allows independent scaling of each service; otherwise, unnecessary resources would be allocated, and costs would increase significantly, especially for the ML inference service, which is more resource-intensive than the backend API.
-> - Modularizes and separates concerns, making it easier to maintain and update each service independently. For example, the ML inference service can be updated with new models or optimizations without affecting the backend API, and vice versa.
+> - Allows independent scaling of each service, and therefore, better cost optimization of AWS App Runner. 
+> - Modularizes and separates concerns, facilitating independent maintainance and updates for services. For example, the ML inference service can be updated with new models or optimizations without affecting the backend API, and vice versa.
 
 > **Tradeoffs**
-> - Added complexity in deployment setup, such as setting up resource specifications for each service, managing inter-service communication, and handling potential latency between services.
-> - Increased latency for inference requests due to the need for inter-service communication, which may affect the overall response time of the API. 
+> - Added complexity in deployment setup, such as configuring resources for each service and managing inter-service communication.
+> - Increased latency for inference requests from inter-service communication over the internet, which may affect the overall response time of the API. 
 
 </details>
     
@@ -282,12 +282,12 @@ The server and ML inference service are deployed as separate services on AWS App
 Model artifacts are loaded from AWS S3 at startup of the ML inference service. 
 
 > **Reasoning**
-> - Ensures the models are available at runtime only and keep the Docker image as small as possible. Alternatively, the model artifacts could have been baked into the Docker image of the ML inference service for model-loading convenience; however, the image would have been significantly larger, and any model update would have required a new image build and deployment, which would have increased the deployment time and model selection complexity.
-> - Allows for easier model installations on the AWS App Runner instances for the ML inference service, as the specified models can be downloaded from S3 at startup without the need for additional setup steps or manual intervention. 
+> - Retrieves the models at runtime only, keeping the ML inference service Docker image as small as possible. 
+> - Allows for easier model selection on the AWS App Runner instance for the ML inference service, as the specified models can be downloaded from S3 at startup without the need for additional Dockerfile setup.
 
 > **Tradeoffs**
 > - Requires up-front setup of the S3 download process, adding to the complexity of the Dockerfile and entrypoint scripts for the ML inference service.
-> - Causes added latency at startup due to the need to download the model artifacts from S3, which may affect the time it takes for the ML inference service to become available after deployment or restart. 
+> - Adds latency at service startup due to the need to download the model artifacts from S3, which affects the ML inference service Time to Service (TTS).
 
 </details>
 
@@ -298,12 +298,12 @@ Model artifacts are loaded from AWS S3 at startup of the ML inference service.
 Logging is handled using AWS CloudWatch, where all logs from the backend API, ML inference service, and deployment infrastructure are collected and stored for monitoring and debugging purposes. Error handling is implemented in both services to catch and log any errors that occur during request processing, model inference, or inter-service communication. 
 
 > **Reasoning**
-> - Centralized logging in AWS CloudWatch allows for easier monitoring and debugging of the entire system, as all logs are stored in one place and can be easily accessed and analyzed. 
-> - Long-term log storage in CloudWatch allows for analysis of and update on system performance, even after a service fails or is restarted.
+> - Centralized logging in AWS CloudWatch faciliates monitoring, logs access, and debugging of the entire system.
+> - Long-term log storage in CloudWatch allows for analysis of and update on system performance, even after a service fails or restarts.
 
 > **Tradeoffs**
 > - Storage costs can increase over time as logs accumulate, especially if the system experiences a high volume of requests or errors. 
-> - Each AWS App Runner instance deployed has an independent log, potentially making it more difficult to analyze system performance during errors and failures; thus, logs would need to be aggregated and correlated across related instances to get a complete picture of the system's behavior during those events.
+> - Each AWS App Runner instance deployed has an independent log in CloudWatch, potentially making it more difficult to analyze system performance across many instances.
 
 </details>
 
@@ -333,7 +333,7 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 - Expanding the model to handle more nuanced bias classifications, such as Libertarian or Independent political biases, or to support additional languages beyond English.
 - Including model options from which users can choose when making inference requests (e.g., allowing users to select between different model versions or architectures).
 - Implementing a feedback mechanism for users to provide input on the accuracy of the predictions, which could be used to further improve the model over time.
-- Adding queues and asynchronous processing to handle higher loads and improve response times for inference requests (i.e., event-driven architecture).
+- Adding message queues and asynchronous processing to handle higher loads and improve response times for inference requests.
 
 ## Notes
 1. The ML artifacts, such as the classification model and label encoder, were trained and evaluated in another project using the Hyperpartisan Training Dataset (2018) and are not included in this repository. For the sake of this project's focus, the code for training/evaluation is not provided. 
