@@ -102,7 +102,11 @@ The Request-Response flow of the web app for a "happy path" is as follows:
 
 ### GET /
 Landing page with API overview and usage instructions.
+
+**Response**:
+
 Response status: 200
+
 Response could be either a simple HTML page or a JSON response with HTML code for the landing page.
 
 </details>
@@ -112,7 +116,9 @@ Response could be either a simple HTML page or a JSON response with HTML code fo
 
 ### GET /health
 Health check endpoint. Returns JSON with service status and uptime.
-Response:
+
+**Response**:
+
 Response status: 200
 ```json
 {
@@ -130,23 +136,25 @@ Response status: 200
 
 ### POST /predict
 Accepts JSON with a news article text and returns bias inference results.
-Required headers:
+
+**Required headers**:
 ```json
 Content-Type: application/json
 X-Internal-API-Key: <api_key>
 ```
 
-Request body:
+**Request body**:
 ```json
 {
     "text": "Full text of a news article (max 3000 chars)"
 }
 ```
-Contraints:
+**Contraints**:
 - Input text should ideally be a news article or a portion of one (max 3000 chars).
 - API is designed to handle news articles of U.S. contexts.
             
-Response:
+**Response**:
+
 Response status: 200
 ```json
 {
