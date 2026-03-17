@@ -22,8 +22,8 @@ POST /predict:
 ```bash
 TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
 
-curl -X POST https://api.osvaldohernandez.dev/predict \\
--H "Content-Type: application/json" \\
+curl -X POST https://api.osvaldohernandez.dev/predict \
+-H "Content-Type: application/json" \
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
 ```
 
