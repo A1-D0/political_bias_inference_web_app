@@ -28,11 +28,12 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 ```
 
 ## High-level architecture
-- The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
 - Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
+- The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
 - The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
 - The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which then sends the response to the client. 
 - Logs from all services, including error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
+- Cloudflare is used for DNS management, routing incoming requests from the user to the backend API hosted on AWS App Runner.
 
 <p align="center">
   <img alt="High-level architecture of the political bias inference web app" src="./docs/diagrams/web_app_high_level_architecture.svg">
@@ -88,7 +89,7 @@ The Request-Response flow of the web app for a "happy path" is as follows:
 6. If the API key is valid, the ML inference service performs inference on the text using the loaded machine learning model and label encoder artifacts.
 7. The ML inference service returns the prediction results to the backend API.
 8. The backend API receives the prediction payload and validates the response data using its middleware.
-9. If the response data is valid, the backend API sends the prediction results back to the client.
+9. If the response data is valid, the backend API sends the prediction results back to Cloudflare.
 10. Finally, Cloudflare receives the response from the backend API and forwards it to the client.
 
 <p align="center">
@@ -151,7 +152,7 @@ X-Internal-API-Key: <api_key>
 ```
 **Contraints**:
 - Input text should ideally be a news article or a portion of one (max 3000 chars).
-- API is designed to handle news articles of U.S. contexts.
+- API is designed to handle English news articles of U.S. contexts.
             
 **Response**:
 
@@ -276,7 +277,7 @@ The server and ML inference service are deployed as separate services on AWS App
 </details>
     
 <details>
-    <summary>Model artifcats management</summary>
+    <summary>Model artifacts management</summary>
 
 ### Model artifacts management
 Model artifacts are loaded from AWS S3 at startup of the ML inference service. 
@@ -336,7 +337,7 @@ Logging is handled using AWS CloudWatch, where all logs from the backend API, ML
 - Adding message queues and asynchronous processing to handle higher loads and improve response times for inference requests.
 
 ## Notes
-1. The ML artifacts, such as the classification model and label encoder, were trained and evaluated in another project using the Hyperpartisan Training Dataset (2018) and are not included in this repository. For the sake of this project's focus, the code for training/evaluation is not provided. 
+1. The ML artifacts, such as the classification model and label encoder, were trained and evaluated in another project using the Hyperpartisan Training Dataset (2018) and are not included in this repository. For the sake of this project's focus, the code for modeling is not provided. 
 2. The current live model is a Linear SVC pipeline with sentence-transformer text embedder, trained to classify articles into five bias categories: left, left-center, center, right-center, and right. The dummy model included in this repository is a trivial model to be used as a demo only. The label encoder is a simple mapping of the five ordinal labels to integers.
 
 ## Sources
