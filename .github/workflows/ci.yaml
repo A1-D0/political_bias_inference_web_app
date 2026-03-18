@@ -41,13 +41,13 @@ jobs:
         env: 
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download "Inference_Models_v1.0" \
+          gh release download "Inference_Models_v1.1" \
             --repo "${{ github.repository }}" \
-            --pattern "model_artifacts_v1.zip" \
+            --pattern "model_artifacts_v1.1.zip" \
             --dir src/ml_inference_app/models
 
-          unzip -o src/ml_inference_app/models/model_artifacts_v1.zip -d src/ml_inference_app/models/
-          rm src/ml_inference_app/models/model_artifacts_v1.zip
+          unzip -o src/ml_inference_app/models/model_artifacts_v1.1.zip -d src/ml_inference_app/models/
+          rm src/ml_inference_app/models/model_artifacts_v1.1.zip
           ls -la src/ml_inference_app/models/
 
       - name: Create test API key file
@@ -58,7 +58,7 @@ jobs:
       - name: Run pytest
         env: 
           MODELS_DIR: src/ml_inference_app/models
-          MODEL_FILE: linear_svc_pipeline_v1.joblib
+          MODEL_FILE: dummy_model_pipeline_v1.joblib
           LABEL_ENCODER_FILE: articles-bypublisher_LabelEncoder_v1.joblib
           INTERNAL_API_KEY: secrets/test_api_key.txt
         run: |
