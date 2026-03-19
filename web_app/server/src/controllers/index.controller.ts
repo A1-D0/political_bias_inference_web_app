@@ -30,6 +30,8 @@ async function indexController(req: Request, res: Response) {
             <h1>News Bias Inference API</h1>
             <p>Built with Python, TypeScript, Docker, AWS App Runner.</p>
 
+            <p><b>Note: This web API is only available during weekdays from 9 AM to 4 PM (Eastern Time).</b></p>
+
             <h2>API Overview</h2>
             <p>REST API for political bias inference on U.S. news articles.</p>
             <p>Production ML inference backend deployed on AWS.</p>
@@ -70,7 +72,7 @@ X-Internal-API-Key: &lt;api_key&gt;
             <p><b>Contraints:</b></p>
             <ul>
                <li>Input text should ideally be a news article or a portion of one (max 3000 chars).</li>
-                <li>API is designed to handle news articles of U.S. contexts.</li>
+                <li>API is designed to handle English news articles of U.S. contexts.</li>
             </ul>
             <p><b>Response:</b></p>
             <p>Response status: 200</p>
@@ -123,7 +125,7 @@ curl -X POST https://api.osvaldohernandez.dev/predict \\
             <ul>
               <li><a href="https://apnews.com/article/trump-air-force-one-electrical-issue-c3044b52b792a8c12f6211718d94f8fe">Air Force One returns to Washington area due to minor electrical issue, White House says. Associated Press News (2026).</a></li>
               <li><p>Hyperpartisan Training Dataset. Zenodo (2018).</p><a href="https://doi.org/10.5281/zenodo.1489920"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1489920.svg" alt="DOI"></a></li>
-              <li><p>Source code available on <a href="https://github.com/A1-D0">GitHub</a>.</p></li>
+              <li><p>Source code available on <a href="https://github.com/A1-D0/political_bias_inference_web_app">GitHub</a>.</p></li>
             </ul>
 
           </body>
