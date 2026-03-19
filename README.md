@@ -197,7 +197,7 @@ For running the project locally in development mode, you will need to have the f
 Ensure Docker Desktop is installed and running on your machine. Then, follow these steps:
 1. Clone the repository:
 ```bash
-git clone https://A1_D0/political_bias_inference_web_app.git
+git clone https://github.com/A1-D0/political_bias_inference_web_app.git  
 ```
 2. Navigate to the project directory:
 ```bash
