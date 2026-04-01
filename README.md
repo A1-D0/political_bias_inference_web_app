@@ -29,11 +29,12 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 
 ## High-level architecture
 - Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
-- The system is deployed on AWS using App Runner with two services: a backend API and a dedicated ML inference service. 
+- The AWS Lambda Start/Update function starts the AWS App Runner instances and updates the instances with the latest Docker images from AWS ECR. The Lambda Stop function stops the App Runner instances.
+- The system is deployed on AWS App Runner as two services: a backend API and an ML inference service. 
 - The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
-- The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which then sends the response to the client. 
-- Logs from all services, including error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
-- Cloudflare is used for DNS management, routing incoming requests from the user to the backend API hosted on AWS App Runner.
+- The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which sends the response to the client. 
+- Logs from all AWS services, such as error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
+- Cloudflare is used for DNS management, routing incoming requests and responses between the user and the backend API.
 
 <p align="center">
   <img alt="High-level architecture of the political bias inference web app" src="./docs/diagrams/web_app_high_level_architecture.svg">
