@@ -17,7 +17,7 @@ Date Created:
     January 26, 2026
 
 Date Modified:
-    February 8, 2026
+    April 9, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -40,7 +40,6 @@ os.environ.setdefault("LABEL_ENCODER_PATH",
                       str(ROOT / "src" / "ml_inference_app" /"models" / "articles-bypublisher_LabelEncoder_v1.joblib"))
 
 import pytest
-# from src.app import app
 from ml_inference_app.app import app
 
 @pytest.fixture

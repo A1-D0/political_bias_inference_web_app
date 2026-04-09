@@ -20,7 +20,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    February 14, 2026
+    April 9, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -35,6 +35,8 @@ from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 from pathlib import Path
+from ml_inference_app.schemas.prediction_schema import PredictRequestBodySchema, PredictRequestHeadersSchema
+from pydantic import ValidationError
 
 # load environment variables from .env file
 # note that this allows subfiles to access the same environment variables
@@ -118,22 +120,49 @@ LABEL_ENCODER_VERSION = LABLE_ENCODER_FILE.split(".")[0]
 app = Flask(__name__)
 
 print(f"ML Inference Service is running on http://{HOST}:{PORT}")
+
 # --------- END OF CONFIGURATION AND SETUP ---------
 
-# ---------- START OF API ENDPOINTS ----------
+# ---------- START OF API MIDDLEWARE ----------
+
+@app.before_request
+def predict_endpoint_input_validation():
+    """
+    Middleware to validate input for the /predict endpoint before processing the request.
+
+    Returns:
+        A Flask response with an error message and a 400 status code if validation fails,
+        or None to continue processing the request if validation succeeds.
+    """
+    if request.endpoint != "predict":
+        return # Skip validation for non-predict endpoints
+    try:
+        PredictRequestHeadersSchema(
+                content_type=request.headers.get("Content-Type"),
+                x_internal_api_key=request.headers.get("X-Internal-API-Key"))
+        request_data = (request.get_json(force=True, silent=True) or {})
+        PredictRequestBodySchema(**request_data)
+    except ValidationError as e:
+        return jsonify({"error": f"Input validation failed: {str(e)}"}), 400
 
 @app.before_request
 def require_internal_api_key():
     """
     Middleware to require internal API key verification for all endpoints
-except the health check.
+    except the health check.
     """
     if request.endpoint != "health_check":
         api_key_check = internal_api_key_verification()
 
         # return error response if API key is invalid
-        if api_key_check is not True:
+        # Note: do not change this logic because there is no
+        # other clever way to handle validated API keys from the request headers
+        if api_key_check is not True: 
             return api_key_check  
+
+# ---------- END OF API MIDDLEWARE ----------
+
+# ---------- START OF API ENDPOINTS ----------
 
 @app.get("/health")
 def health_check():
@@ -160,6 +189,7 @@ def health_check():
 def predict():
     """
     Predicts the political bias of the input text using the pre-loaded model.
+    Note that the input validation for this endpoint is handled by the predict_endpoint_input_validation middleware.
 
     Returns:
         A Flask response containing the predicted label in JSON format or an
@@ -167,11 +197,6 @@ def predict():
     """
     data = request.get_json(force=True, silent=True) or {}
     text = (data.get("text") or "").strip()
-
-    if not text:
-        return jsonify({"error": "No text provided for prediction."}), 400
-    elif not isinstance(text, str):
-        return jsonify({"error": "Input text must be a string."}), 400
 
     # prepare input data
     input_data = pd.DataFrame({"text": [text]}) 
@@ -193,6 +218,7 @@ def predict():
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
 # ---------- END OF API ENDPOINTS ----------
+
 def main():
     if not DEBUG_MODE:
         return
