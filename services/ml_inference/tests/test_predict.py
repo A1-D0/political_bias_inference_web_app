@@ -16,10 +16,10 @@ Date Created:
     January 26, 2026
 
 Date Modified:
-    January 27, 2026
+    April 9, 2026
 
 References:
-    Copilot, ChatGPT, Flask documentation
+    Copilot, ChatGPT, Flask documentation, APNews article on Air Force One incident
 """
 
 text = """ 
@@ -63,11 +63,22 @@ def test_predict_missing_api_key(client):
     resp = client.post("/predict", 
                        json={"text": text},
                        headers={"X-Internal-API-Key": ""})
-    assert resp.status_code == 401
+    assert resp.status_code == 400
 
 def test_predict_invalid_api_key(client):
     resp = client.post("/predict", 
                        json={"text": text},
                        headers={"X-Internal-API-Key": "invalid-api-key"})
     assert resp.status_code == 401
+
+def test_predict_missing_text(client):
+    resp = client.post("/predict", 
+                       json={},
+                       headers={"X-Internal-API-Key": TEST_API_KEY})
+    assert resp.status_code == 400
+
+def test_predict_missing_header(client):
+    resp = client.post("/predict", 
+                       json={"text": text})
+    assert resp.status_code == 400
 

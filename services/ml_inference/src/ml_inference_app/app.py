@@ -20,7 +20,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    April 8, 2026
+    April 9, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -149,13 +149,15 @@ def predict_endpoint_input_validation():
 def require_internal_api_key():
     """
     Middleware to require internal API key verification for all endpoints
-except the health check.
+    except the health check.
     """
     if request.endpoint != "health_check":
         api_key_check = internal_api_key_verification()
 
         # return error response if API key is invalid
-        if not api_key_check:
+        # Note: do not change this logic because there is no
+        # other clever way to handle validated API keys from the request headers
+        if api_key_check is not True: 
             return api_key_check  
 
 # ---------- END OF API MIDDLEWARE ----------

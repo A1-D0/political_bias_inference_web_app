@@ -6,7 +6,7 @@ Author:
 Date Created: 
     April 8, 2026
 Date Modified: 
-    April 8, 2026
+    April 9, 2026
 References: Copilot, ChatGPT, Pydantic documentation
 """
 
@@ -25,6 +25,8 @@ class PredictRequestHeadersSchema(BaseModel):
     Schema for the prediction request headers.
     """
     content_type: str = Field(..., 
-                              description="The content type of the request must be application/json.")
+                              description="The content type of the request must be application/json.",
+                              min_length=1)
     x_internal_api_key: str = Field(..., 
-                                    description="The internal API key for authentication. Must be provided in the X-Internal-API-Key header.")
+                                    description="The internal API key for authentication. Must be provided in the X-Internal-API-Key header.",
+                                    min_length=1)
