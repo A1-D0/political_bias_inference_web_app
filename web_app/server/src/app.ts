@@ -1,14 +1,11 @@
 import express from 'express';
 import routes from './routes/routes';
-import { rateLimiter } from './middleware/rateLimiter';
 
 const app = express();
 
 app.use(express.json());
 
 app.set('trust proxy', true); // Trust the first proxy (e.g., Cloudflare) to get the correct client IP address
-
-app.use(rateLimiter); 
 
 routes(app);
 
