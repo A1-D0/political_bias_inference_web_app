@@ -103,6 +103,8 @@ jobs:
           echo "PORT=3000" > .env.test
           echo "INFERENCE_API_URL=http://localhost:5020" >> .env.test
           echo "INFERENCE_API_KEY=secrets/test_api_key.txt" >> .env.test
+          echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env.test
+          echo "RATE_LIMIT_MAX_REQUESTS=10" >> .env.test
 
       - name: Run tests
         run: npm run test 
