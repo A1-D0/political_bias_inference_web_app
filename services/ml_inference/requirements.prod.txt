@@ -19,3 +19,5 @@ transformers==4.57.6
 langdetect==1.0.9
 # swap this in if it works for you (usually avoids compiling):
 fasttext-wheel
+
+pydantic==2.12.5
