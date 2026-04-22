@@ -23,8 +23,11 @@ class PredictModel {
         * @returns {Promise<typeof MLInferenceResponseSchema>} - The prediction result.
         * @throws {Error} - Throws an error if the prediction fails.
     */
-    async predict(text: MLInferenceRequest): Promise<MLInferenceResponse | false> {
+    async predict(text: MLInferenceRequest, requestId?: string): Promise<MLInferenceResponse | false> {
         if (!text) return false;
+
+        const fetchStartedAt = process.hrtime.bigint();
+        let responseReceivedAt: bigint | undefined;
 
         try {
             const result = await fetch(`${this.inferenceURL}/predict`, {
@@ -32,11 +35,28 @@ class PredictModel {
                 headers: {
                     'Content-Type': 'application/json',
                     "X-Internal-API-Key": this.APIKey,
+                    ...(requestId ? { 'X-Request-Id': requestId } : {}),
                 },
                 body: JSON.stringify(text)
             });
+            responseReceivedAt = process.hrtime.bigint();
 
             const data = await result.json();
+            const completedAt = process.hrtime.bigint();
+            const upstreamLatencyMs = Number(completedAt - fetchStartedAt) / 1_000_000;
+            const networkTimeMs = Number(responseReceivedAt - fetchStartedAt) / 1_000_000;
+
+            logger.info({
+                service: 'backend-api',
+                event: 'upstream_call_completed',
+                request_id: requestId || 'unknown',
+                upstream_service: 'ml-service',
+                upstream_route: '/predict',
+                upstream_status_code: result.status,
+                upstream_latency_ms: Number(upstreamLatencyMs.toFixed(3)),
+                network_time_ms: Number(networkTimeMs.toFixed(3)),
+                timeout: false,
+            });
 
             if (!data || !data.prediction) return false;
 
@@ -48,7 +68,26 @@ class PredictModel {
 
             return deliverable; 
         } catch (error: any) {
-            logger.error({err: error, code: error?.code}, 'Error during prediction');
+            const completedAt = process.hrtime.bigint();
+            const upstreamLatencyMs = Number(completedAt - fetchStartedAt) / 1_000_000;
+            const timeout = error?.name === 'AbortError'
+                || error?.code === 'ABORT_ERR'
+                || error?.code === 'ETIMEDOUT';
+
+            logger.error({
+                service: 'backend-api',
+                event: 'upstream_call_failed',
+                request_id: requestId || 'unknown',
+                upstream_service: 'ml-service',
+                upstream_route: '/predict',
+                upstream_latency_ms: Number(upstreamLatencyMs.toFixed(3)),
+                network_time_ms: responseReceivedAt
+                    ? Number((Number(responseReceivedAt - fetchStartedAt) / 1_000_000).toFixed(3))
+                    : undefined,
+                timeout,
+                error_type: error?.name || 'Error',
+                code: error?.code,
+            });
             throw error;
         }
     }

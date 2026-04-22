@@ -30,8 +30,10 @@ import joblib
 import torch
 import pandas as pd
 import time
+import json
+import secrets
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 from pathlib import Path
@@ -48,6 +50,20 @@ from ml_inference_app.middleware.internal_auth import internal_api_key_verificat
 
 # get start time for uptime calculation
 START_TIME = time.time()
+SERVICE_NAME = "ml-service"
+
+def emit_log(level: str, event: str, **fields):
+    """
+    Emits a structured JSON log line to stdout.
+    """
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+        "level": level,
+        "service": SERVICE_NAME,
+        "event": event,
+    }
+    payload.update(fields)
+    print(json.dumps(payload, separators=(",", ":")), flush=True)
 
 # --------- START OF CONFIGURATION AND SETUP ---------
 # add environmental variables for model and label encoder paths, 
@@ -89,9 +105,9 @@ PORT = int(os.getenv("PORT", 5000))
 # before loading the model
 device_is_cuda = torch.cuda.is_available()
 if device_is_cuda:
-    print("CUDA device detected. Using GPU for inference.")
+    emit_log("info", "inference_runtime_selected", runtime_device="gpu")
 else:
-    print("No CUDA device detected. Using CPU for inference.")
+    emit_log("info", "inference_runtime_selected", runtime_device="cpu")
     _original_torch_load = torch.load
 
     def cpu_torch_load(*args, **kwargs):
@@ -119,11 +135,39 @@ LABEL_ENCODER_VERSION = LABLE_ENCODER_FILE.split(".")[0]
 
 app = Flask(__name__)
 
-print(f"ML Inference Service is running on http://{HOST}:{PORT}")
+emit_log("info", "server_started", host=HOST, port=PORT)
 
 # --------- END OF CONFIGURATION AND SETUP ---------
 
 # ---------- START OF API MIDDLEWARE ----------
+
+@app.before_request
+def setup_request_context():
+    """
+    Initializes request-scoped metadata for structured logging.
+    """
+    if request.endpoint != "predict":
+        return
+
+    request_id = (request.headers.get("X-Request-Id") or "").strip()
+    if not request_id:
+        request_id = f"req_{secrets.token_hex(6)}"
+
+    g.request_id = request_id
+    g.request_started_at = time.perf_counter()
+
+    raw_body = request.get_data(cache=True, as_text=False) or b""
+    payload = request.get_json(silent=True) or {}
+    text = payload.get("text")
+    text_length = len(text) if isinstance(text, str) else 0
+
+    emit_log(
+        "info",
+        "inference_request_received",
+        request_id=request_id,
+        text_length_chars=text_length,
+        request_body_bytes=len(raw_body),
+    )
 
 @app.before_request
 def predict_endpoint_input_validation():
@@ -161,6 +205,16 @@ def require_internal_api_key():
             return api_key_check  
 
 # ---------- END OF API MIDDLEWARE ----------
+
+@app.after_request
+def attach_request_id_header(response):
+    """
+    Attaches the request id to responses when present.
+    """
+    request_id = getattr(g, "request_id", None)
+    if request_id:
+        response.headers["X-Request-Id"] = request_id
+    return response
 
 # ---------- START OF API ENDPOINTS ----------
 
@@ -203,18 +257,41 @@ def predict():
 
     # perform prediction
     try:
+        inference_started_at = time.perf_counter()
         output = model.predict(input_data)
         output_label = label_encoder.inverse_transform(output)
+        inference_latency_ms = (time.perf_counter() - inference_started_at) * 1000
 
         # change wording of the "least" output label, if applicable
         if output_label[0] == "least":
             output_label[0] = "center"
+
+        total_latency_ms = (time.perf_counter() - getattr(g, "request_started_at", time.perf_counter())) * 1000
+
+        emit_log(
+            "info",
+            "inference_completed",
+            request_id=getattr(g, "request_id", "unknown"),
+            inference_latency_ms=round(inference_latency_ms, 3),
+            total_latency_ms=round(total_latency_ms, 3),
+            model_version=MODEL_VERSION,
+            prediction_label=output_label[0],
+        )
 
         return jsonify({"prediction": output_label[0],
                         "model_version": MODEL_VERSION, 
                         "label_encoder_version": LABEL_ENCODER_VERSION
                         }), 200
     except Exception as e:
+        total_latency_ms = (time.perf_counter() - getattr(g, "request_started_at", time.perf_counter())) * 1000
+        emit_log(
+            "error",
+            "inference_failed",
+            request_id=getattr(g, "request_id", "unknown"),
+            total_latency_ms=round(total_latency_ms, 3),
+            error_type=type(e).__name__,
+            error_message=str(e),
+        )
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
 # ---------- END OF API ENDPOINTS ----------

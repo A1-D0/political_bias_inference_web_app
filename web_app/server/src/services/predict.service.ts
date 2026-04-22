@@ -7,7 +7,10 @@ import predictModel from '../utils/PredictClass'
     * @param {MLInferenceRequest} text - The input text data for prediction.
     * @returns {Promise<typeof MLInferenceResponseSchema>} - The prediction result.
 */
-export async function predictService(text: MLInferenceRequest): Promise<MLInferenceResponse | false> {
-    const result = await predictModel.predict(text);
+export async function predictService(
+    text: MLInferenceRequest,
+    requestId?: string
+): Promise<MLInferenceResponse | false> {
+    const result = await predictModel.predict(text, requestId);
     return result;
 }

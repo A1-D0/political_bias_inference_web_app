@@ -1,13 +1,12 @@
 import pino from 'pino';
 
 const logger = pino({
-    transport: {
-        target: 'pino-pretty',
-        options: {
-            colorize: true,
-            translateTime: 'yyyy-mm-dd hh:mm:ss',
-            ignore: 'pid,hostname'
-        }
+    base: undefined,
+    timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+    formatters: {
+        level: (label) => {
+            return { level: label };
+        },
     },
 });
 

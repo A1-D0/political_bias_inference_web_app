@@ -12,18 +12,22 @@
 */
 import request from 'supertest';
 import mockPredict from '../helpers/mockPredict.helper';
+import logger from '../../src/utils/logger.utils';
 
 describe("POST /predict", () => {
     let app: any;
+    let loggerInfoSpy: jest.SpyInstance;
 
     // Set up the mock predict function before each test
     beforeEach(async () => {
         mockPredict();
+        loggerInfoSpy = jest.spyOn(logger, 'info').mockImplementation(() => undefined as any);
         app = (await import('../../src/app')).default; 
     });
     
     // Reset all mocks after each test
     afterEach(() => {
+        jest.restoreAllMocks();
         jest.resetAllMocks();
     });
 
@@ -31,6 +35,7 @@ describe("POST /predict", () => {
     it("should return 200 and prediction for valid input", async () => {
         const res = await request(app)
             .post('/predict')
+            .set('X-Request-Id', 'req_test123456')
             .set('Content-Type', 'application/json')
             .send({ text: "This is a test input for prediction." });
         
@@ -38,6 +43,46 @@ describe("POST /predict", () => {
         expect(res.body).toHaveProperty('model_version');
         expect(res.body).toHaveProperty('label_encoder_version');
         expect(res.status).toBe(200);
+        expect(res.headers['x-request-id']).toBe('req_test123456');
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    'X-Request-Id': 'req_test123456',
+                }),
+            }),
+        );
+
+        expect(loggerInfoSpy).toHaveBeenCalledWith(expect.objectContaining({
+            service: 'backend-api',
+            event: 'upstream_call_completed',
+            request_id: 'req_test123456',
+            upstream_service: 'ml-service',
+            upstream_route: '/predict',
+            upstream_status_code: 200,
+            timeout: false,
+        }));
+
+        expect(loggerInfoSpy).toHaveBeenCalledWith(expect.objectContaining({
+            service: 'backend-api',
+            event: 'request_completed',
+            request_id: 'req_test123456',
+            method: 'POST',
+            route: '/predict',
+            status_code: 200,
+            client_ip_hash: expect.any(String),
+            user_agent: expect.any(String),
+            request_body_bytes: expect.any(Number),
+            response_body_bytes: expect.any(Number),
+        }));
+
+        const requestLog = loggerInfoSpy.mock.calls.find(([entry]) => {
+            return entry?.event === 'request_completed';
+        })?.[0];
+        expect(requestLog).not.toEqual(expect.objectContaining({
+            text: "This is a test input for prediction.",
+        }));
     });
 
     // Check for missing input (missing "text" field) 
