@@ -42,7 +42,29 @@ class PredictModel {
             });
             responseReceivedAt = process.hrtime.bigint();
 
-            const data = await result.json();
+            let data;
+            try {
+                data = await result.json();
+            } catch (error: any) {
+                const completedAt = process.hrtime.bigint();
+                const upstreamLatencyMs = Number(completedAt - fetchStartedAt) / 1_000_000;
+                const networkTimeMs = Number(responseReceivedAt - fetchStartedAt) / 1_000_000;
+
+                logger.error({
+                    service: 'backend-api',
+                    event: 'upstream_response_parse_failed',
+                    request_id: requestId || 'unknown',
+                    upstream_service: 'ml-service',
+                    upstream_route: '/predict',
+                    upstream_status_code: result.status,
+                    upstream_latency_ms: Number(upstreamLatencyMs.toFixed(3)),
+                    network_time_ms: Number(networkTimeMs.toFixed(3)),
+                    timeout: false,
+                    error_type: error?.name || 'Error',
+                });
+                throw error;
+            }
+
             const completedAt = process.hrtime.bigint();
             // network_time_ms ends at response headers; upstream_latency_ms includes JSON parsing.
             const upstreamLatencyMs = Number(completedAt - fetchStartedAt) / 1_000_000;

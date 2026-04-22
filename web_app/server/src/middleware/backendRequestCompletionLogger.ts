@@ -2,6 +2,9 @@ import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger.utils';
 
+type ResponseChunk = string | Buffer | Uint8Array;
+type ResponseWriteCallback = (error?: Error | null) => void;
+
 // Handles backend request correlation and emits one structured completion log per response
 export type InstrumentedRequest = Request & {
     // rawBodyBytes is populated by the JSON parser verify hook in app.ts
@@ -65,16 +68,24 @@ export function backendRequestCompletionLogger(
     const originalEnd = res.end.bind(res);
 
     // Wrap response writes so the completion log can include the response body size
-    res.write = ((chunk: any, encoding?: any, callback?: any) => {
+    res.write = ((
+        chunk: ResponseChunk,
+        encoding?: BufferEncoding | ResponseWriteCallback,
+        callback?: ResponseWriteCallback,
+    ) => {
         responseBodyBytes += getChunkByteLength(chunk);
 
-        return originalWrite(chunk, encoding, callback);
+        return originalWrite(chunk, encoding as BufferEncoding, callback);
     }) as typeof res.write;
 
-    res.end = ((chunk?: any, encoding?: any, callback?: any) => {
+    res.end = ((
+        chunk?: ResponseChunk,
+        encoding?: BufferEncoding | ResponseWriteCallback,
+        callback?: ResponseWriteCallback,
+    ) => {
         responseBodyBytes += getChunkByteLength(chunk);
 
-        return originalEnd(chunk, encoding, callback);
+        return originalEnd(chunk, encoding as BufferEncoding, callback);
     }) as typeof res.end;
 
     res.on('finish', () => {

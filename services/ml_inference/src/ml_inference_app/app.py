@@ -73,6 +73,17 @@ def emit_log(level: str, event: str, **fields):
     payload.update(fields)
     print(json.dumps(payload, separators=(",", ":")), flush=True)
 
+def get_request_latency_ms() -> float:
+    """
+    Returns total elapsed request time in milliseconds when request timing exists.
+
+    Returns:
+        latency_ms (float): The total latency of the request in milliseconds, 
+        calculated as the difference between the current time and the time when the 
+        request started. If the request start time is not available, it returns 0.
+    """
+    return (time.perf_counter() - getattr(g, "request_started_at", time.perf_counter())) * 1000
+
 # --------- START OF CONFIGURATION AND SETUP ---------
 # add environmental variables for model and label encoder paths, 
 # with validation and a default value
@@ -284,14 +295,12 @@ def predict():
         if output_label[0] == "least":
             output_label[0] = "center"
 
-        total_latency_ms = (time.perf_counter() - getattr(g, "request_started_at", time.perf_counter())) * 1000
-
         emit_log(
             "info",
             "inference_completed",
             request_id=getattr(g, "request_id", "unknown"),
             inference_latency_ms=round(inference_latency_ms, 3),
-            total_latency_ms=round(total_latency_ms, 3),
+            total_latency_ms=round(get_request_latency_ms(), 3),
             model_version=MODEL_VERSION,
             prediction_label=output_label[0],
         )
@@ -301,12 +310,11 @@ def predict():
                         "label_encoder_version": LABEL_ENCODER_VERSION
                         }), 200
     except Exception as e:
-        total_latency_ms = (time.perf_counter() - getattr(g, "request_started_at", time.perf_counter())) * 1000
         emit_log(
             "error",
             "inference_failed",
             request_id=getattr(g, "request_id", "unknown"),
-            total_latency_ms=round(total_latency_ms, 3),
+            total_latency_ms=round(get_request_latency_ms(), 3),
             error_type=type(e).__name__,
             error_message=str(e),
         )
