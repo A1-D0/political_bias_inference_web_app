@@ -54,7 +54,15 @@ SERVICE_NAME = "ml-service"
 
 def emit_log(level: str, event: str, **fields):
     """
-    Emits a structured JSON log line to stdout.
+    Emits compact structured JSON to stdout for platform log collection.
+
+    The log entry includes a timestamp, log level, service name, event type, 
+    and any additional fields provided. The JSON is compacted to minimize size.
+
+    Args:
+        level (str): The log level (e.g., "info", "error").
+        event (str): A short string describing the event type.
+        **fields: Additional key-value pairs to include in the log entry.
     """
     payload = {
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
@@ -145,6 +153,9 @@ emit_log("info", "server_started", host=HOST, port=PORT)
 def setup_request_context():
     """
     Initializes request-scoped metadata for structured logging.
+
+    Reuses an incoming X-Request-Id or generates one locally, then logs only
+    safe request metadata such as text length and request body size.
     """
     if request.endpoint != "predict":
         return
@@ -210,6 +221,12 @@ def require_internal_api_key():
 def attach_request_id_header(response):
     """
     Attaches the request id to responses when present.
+
+    Args:
+        response: The Flask response object to which the X-Request-Id header will be added if a request ID is present in the request context.
+
+    Returns:
+        The modified Flask response object with the X-Request-Id header if a request ID is present, or the original response if not.
     """
     request_id = getattr(g, "request_id", None)
     if request_id:
@@ -257,6 +274,7 @@ def predict():
 
     # perform prediction
     try:
+        # Track model inference separately from total request latency
         inference_started_at = time.perf_counter()
         output = model.predict(input_data)
         output_label = label_encoder.inverse_transform(output)

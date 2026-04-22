@@ -20,6 +20,7 @@ class PredictModel {
     /*
         * Perform prediction on text input data.
         * @param {MLInferenceRequest} text - The input text data for prediction.
+        * @param {string} requestId - Optional request ID to correlate backend and ML service logs.
         * @returns {Promise<typeof MLInferenceResponseSchema>} - The prediction result.
         * @throws {Error} - Throws an error if the prediction fails.
     */
@@ -43,6 +44,7 @@ class PredictModel {
 
             const data = await result.json();
             const completedAt = process.hrtime.bigint();
+            // network_time_ms ends at response headers; upstream_latency_ms includes JSON parsing.
             const upstreamLatencyMs = Number(completedAt - fetchStartedAt) / 1_000_000;
             const networkTimeMs = Number(responseReceivedAt - fetchStartedAt) / 1_000_000;
 

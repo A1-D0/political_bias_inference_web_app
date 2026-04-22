@@ -2,8 +2,11 @@ import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger.utils';
 
+// Handles backend request correlation and emits one structured completion log per response
 export type InstrumentedRequest = Request & {
+    // rawBodyBytes is populated by the JSON parser verify hook in app.ts
     rawBodyBytes?: number;
+    // requestId is attached here so downstream handlers can forward it to upstream services
     requestId?: string;
 };
 
@@ -37,6 +40,10 @@ function getChunkByteLength(chunk: unknown): number {
         : Buffer.byteLength(String(chunk));
 }
 
+/**
+ * Reuses or creates X-Request-Id, exposes it to downstream handlers, and
+ * logs sanitized request/response metadata when the response finishes
+ */
 export function backendRequestCompletionLogger(
     req: Request,
     res: Response,
@@ -57,6 +64,7 @@ export function backendRequestCompletionLogger(
     const originalWrite = res.write.bind(res);
     const originalEnd = res.end.bind(res);
 
+    // Wrap response writes so the completion log can include the response body size
     res.write = ((chunk: any, encoding?: any, callback?: any) => {
         responseBodyBytes += getChunkByteLength(chunk);
 

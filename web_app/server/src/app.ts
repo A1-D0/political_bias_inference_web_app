@@ -4,6 +4,7 @@ import { backendRequestCompletionLogger, InstrumentedRequest } from './middlewar
 
 const app = express();
 
+// Capture request body size for request-completion logs while parsing JSON
 app.use(express.json({
     verify: (req, _res, buf) => {
         (req as InstrumentedRequest).rawBodyBytes = buf.length;
