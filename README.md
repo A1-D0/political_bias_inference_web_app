@@ -82,15 +82,15 @@ The deployment flow of the web app is as follows:
 
 ## Request-Response flow
 The Request-Response flow of the web app for a "happy path" is as follows:
-1. The user enacts the POST /predict endpoint by sending a request with the text of a news article to the URL. 
-2. Cloudflare receives the request and forwards it to the backend API hosted on AWS App Runner.
-3. The backend API handles the request and its middleware performs input validation on the request data. 
-4. If the input data is valid, the backend API sends a request to the ML inference service hosted on AWS App Runner.
-5. The ML inference service receives the request and validates the API key of the response headers.
-6. If the API key is valid, the ML inference service performs inference on the text using the loaded machine learning model and label encoder artifacts.
-7. The ML inference service returns the prediction results to the backend API.
-8. The backend API receives the prediction payload and validates the response data using its middleware.
-9. If the response data is valid, the backend API sends the prediction results back to Cloudflare.
+1. The user enacts the POST /predict endpoint, sending a request with the JSON text payload. 
+2. Cloudflare receives the request and forwards it to the backend API.
+3. The backend API handles the request, performing a per-IP rate limit check and input validation on the request data. 
+4. If the rate limit hasn't been reached and the input data is valid, the backend API sends a request to the ML inference service. 
+5. The ML inference service receives the request, and validates both the API key in the response headers and the request schema.
+6. If the API key and request schema are valid, the ML inference service performs inference on the text (using the loaded machine learning model and label encoder artifacts).
+7. The ML inference service returns the prediction response to the backend API.
+8. The backend API receives the response and validates its schema.
+9. If the response schema is valid, the backend API forwards the response to Cloudflare.
 10. Finally, Cloudflare receives the response from the backend API and forwards it to the client.
 
 <p align="center">
