@@ -11,6 +11,7 @@
     * Author: Osvaldo Hernandez-Segura
 */
 
+import crypto from 'crypto';
 import { Request } from 'express';
 import { rateLimit, ipKeyGenerator }from 'express-rate-limit';
 import logger from '../utils/logger.utils';
@@ -25,6 +26,10 @@ export const WINDOW_MILLISECONDS = () => {
 }; 
 
 export const MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 100); // default to 100 requests per window
+
+function hashClientIdentifier(ip: string): string {
+    return crypto.createHash('sha256').update(ip).digest('hex').slice(0, 16);
+}
 
 export const rateLimiter = rateLimit({
     windowMs: WINDOW_MILLISECONDS(),
@@ -44,10 +49,15 @@ export const rateLimiter = rateLimit({
     handler: (req, res) => {
         const IP = (req.headers['cf-connecting-ip'] as string) || req.ip;
 
-        logger.error({ ip: IP }, `Client IP is blocked on ${req.path} due to rate limiting`);
+        logger.error({
+            service: 'backend-api',
+            event: 'rate_limit_blocked',
+            request_id: res.locals.requestId || 'unknown',
+            route: req.path,
+            client_ip_hash: hashClientIdentifier(IP || 'unknown'),
+        });
 
         res.status(429)
         .json({ error: 'Too many requests, please try again later.' });
     },
 });
-

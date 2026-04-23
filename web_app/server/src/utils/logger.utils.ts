@@ -1,13 +1,13 @@
 import pino from 'pino';
 
+// Emit structured JSON logs with ISO timestamps and no default process metadata
 const logger = pino({
-    transport: {
-        target: 'pino-pretty',
-        options: {
-            colorize: true,
-            translateTime: 'yyyy-mm-dd hh:mm:ss',
-            ignore: 'pid,hostname'
-        }
+    base: undefined,
+    timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+    formatters: {
+        level: (label) => {
+            return { level: label };
+        },
     },
 });
 

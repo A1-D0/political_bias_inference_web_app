@@ -46,6 +46,7 @@ Defense Secretary Pete Hegseth had to make an emergency landing in the United Ki
 in the windshield.
 """
 
+import json
 import os
 
 KEY_PATH = os.environ["INTERNAL_API_KEY"]
@@ -53,11 +54,46 @@ KEY_PATH = os.environ["INTERNAL_API_KEY"]
 with open(KEY_PATH, "r") as f:
     TEST_API_KEY = f.read().strip()
 
-def test_predict_ok(client):
+def test_predict_ok(client, capsys):
     resp = client.post("/predict", 
                        json={"text": text},
-                       headers={"X-Internal-API-Key": TEST_API_KEY}) 
+                       headers={
+                           "X-Internal-API-Key": TEST_API_KEY,
+                           "X-Request-Id": "req_test123456",
+                       }) 
     assert resp.status_code == 200
+    assert resp.headers["X-Request-Id"] == "req_test123456"
+
+    captured = capsys.readouterr().out
+    log_lines = [
+        json.loads(line)
+        for line in captured.splitlines()
+        if line.startswith("{")
+    ]
+
+    received_log = next(
+        log for log in log_lines
+        if log.get("event") == "inference_request_received"
+    )
+    completed_log = next(
+        log for log in log_lines
+        if log.get("event") == "inference_completed"
+    )
+
+    assert received_log["service"] == "ml-service"
+    assert received_log["request_id"] == "req_test123456"
+    assert received_log["text_length_chars"] == len(text)
+    assert received_log["request_body_bytes"] > 0
+
+    assert completed_log["service"] == "ml-service"
+    assert completed_log["request_id"] == "req_test123456"
+    assert completed_log["model_version"]
+    assert completed_log["prediction_label"]
+    assert completed_log["inference_latency_ms"] >= 0
+    assert completed_log["total_latency_ms"] >= 0
+
+    assert "Air Force One returns" not in captured
+    assert TEST_API_KEY not in captured
 
 def test_predict_missing_api_key(client):
     resp = client.post("/predict", 
@@ -81,4 +117,3 @@ def test_predict_missing_header(client):
     resp = client.post("/predict", 
                        json={"text": text})
     assert resp.status_code == 400
-
