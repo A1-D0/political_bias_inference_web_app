@@ -180,6 +180,13 @@ Response status: 401
 }
 ```
 
+Response status: 429
+```json
+{
+    "error": "Too many requests, please try again later."
+}
+```
+
 Response status: 502
 ```json
 {
