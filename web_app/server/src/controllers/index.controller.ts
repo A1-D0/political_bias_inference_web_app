@@ -95,6 +95,12 @@ X-Internal-API-Key: &lt;api_key&gt;
     "error": "Unauthorized access. Invalid API key."
 }
 </pre>
+            <p>Response status: 429</p>
+            <pre>
+{
+    "error": "Too many requests, please try again later."
+}
+</pre>
             <p>Response status: 502</p>
             <pre>
 {
