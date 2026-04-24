@@ -1,3 +1,14 @@
+/*
+    * Description:
+    * This module configures the backend Express application and registers
+    * the logging-aware middleware order for request completion logging,
+    * request body byte capture, and route handling.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT, Express documentation
+*/
 import express from 'express';
 import routes from './routes/routes';
 import { backendRequestCompletionLogger, InstrumentedRequest } from './middleware/backendRequestCompletionLogger';
