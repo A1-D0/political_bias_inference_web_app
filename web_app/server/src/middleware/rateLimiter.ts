@@ -9,6 +9,9 @@
     * The middleware also logs blocked requests with the client's IP address for monitoring purposes.
     *
     * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT, Express-rate-limit documentation
 */
 
 import crypto from 'crypto';

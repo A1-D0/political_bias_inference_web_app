@@ -1,3 +1,14 @@
+/*
+    * Description:
+    * This service module forwards prediction requests from the controller to
+    * the backend ML client while preserving the request ID used for
+    * structured cross-service logging.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT
+*/
 import { MLInferenceRequest, 
     MLInferenceResponse } from '@usnewsweb/shared/schemas/MLInference';
 import predictModel from '../utils/PredictClass'

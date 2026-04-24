@@ -1,3 +1,14 @@
+/*
+    * Description:
+    * This middleware handles backend request correlation and emits structured
+    * request completion logs after responses finish. It also tracks request
+    * IDs and request/response byte counts for logging purposes.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT, Express documentation, Node.js documentation
+*/
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger.utils';

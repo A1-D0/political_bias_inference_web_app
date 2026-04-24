@@ -1,3 +1,14 @@
+/*
+    * Description:
+    * This controller handles prediction requests for the backend API,
+    * delegates valid requests to the prediction service, and emits
+    * structured logs for invalid upstream payloads and controller errors.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT, Express documentation
+*/
 import { Request, Response } from 'express';
 import logger from '../utils/logger.utils'
 import { MLInferenceRequest, 

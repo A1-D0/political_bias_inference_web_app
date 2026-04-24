@@ -1,3 +1,14 @@
+/*
+    * Description:
+    * This module defines the backend prediction model client responsible for
+    * calling the ML inference service and emitting structured logs for
+    * upstream request completion and failure scenarios.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 24, 2026
+    * Date Modified: April 24, 2026
+    * References: Copilot, ChatGPT, Fetch API documentation
+*/
 import { MLInferenceRequest, 
     MLInferenceResponse } from '@usnewsweb/shared/schemas/MLInference';
 import logger from '../utils/logger.utils'
