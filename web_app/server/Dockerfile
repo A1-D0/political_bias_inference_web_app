@@ -54,6 +54,7 @@ FROM node:20-alpine
 WORKDIR /app
 COPY shared ./shared
 COPY server/src ./server/src
+COPY server/public ./server/public
 COPY server/tsconfig.json /app/server/tsconfig.json
 
 # install production dependencies
@@ -76,4 +77,3 @@ EXPOSE 3000
 ENTRYPOINT ["/app/server/entrypoint.server.sh"]
 
 CMD ["npm", "start"]
-

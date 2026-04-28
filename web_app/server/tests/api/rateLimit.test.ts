@@ -16,7 +16,7 @@ import request from 'supertest';
 import mockPredict from '../helpers/mockPredict.helper';
 import { MAX_REQUESTS } from '../../src/middleware/rateLimiter';
 
-describe("POST /predict", () => {
+describe("POST /api/predict", () => {
     let app: any;
 
     // Set up the mock predict function before each test
@@ -30,10 +30,10 @@ describe("POST /predict", () => {
         jest.resetAllMocks();
     });
 
-    it("GET /predict - it should return 429", async () => {
+    it("POST /api/predict - it should return 429", async () => {
         for (let i = 0; i < MAX_REQUESTS + 1; i++) {
             let res = await request(app)
-                .post('/predict')
+                .post('/api/predict')
                 .set('Content-Type', 'application/json')
                 .send({ text: "This is a test input for prediction." });
 
@@ -42,4 +42,3 @@ describe("POST /predict", () => {
         }
     });
 });
-
