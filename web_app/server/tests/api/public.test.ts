@@ -1,3 +1,13 @@
+/*
+    * Description:
+    * This file tests the prediction UI route and browser behavior, including
+    * API submission, error handling, and character counter updates.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 28, 2026
+    * Date Modified: April 28, 2026
+    * References: Copilot, ChatGPT, Jest documentation
+*/
 import fs from 'fs';
 import path from 'path';
 import request from 'supertest';
@@ -53,6 +63,8 @@ function createElementState(overrides: Partial<ElementState> = {}): ElementState
     return element;
 }
 
+// Runs the real browser script in a small mocked DOM so tests cover the client
+// behavior without duplicating public.ts logic or adding a DOM test dependency.
 function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
     let submitHandler: ((event: { preventDefault: jest.Mock }) => Promise<void>) | undefined;
     let inputHandler: (() => void) | undefined;
@@ -102,6 +114,7 @@ function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
         throw new Error('Prediction form submit handler was not registered.');
     }
 
+    // Expose captured event handlers so tests can simulate browser submit/input events.
     return {
         button,
         characterCount,

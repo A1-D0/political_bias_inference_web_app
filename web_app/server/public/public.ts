@@ -1,4 +1,18 @@
+/*
+    * Description:
+    * This browser script handles the prediction UI form, character counter,
+    * API request to /api/predict, loading state, prediction rendering, and
+    * user-facing error messages.
+    *
+    * Author: Osvaldo Hernandez-Segura
+    * Date Created: April 28, 2026
+    * Date Modified: April 28, 2026
+    * References: Copilot, ChatGPT, Express documentation
+*/
+// This file is inlined into public.html and executed directly by the browser.
+// Keep it as vanilla JavaScript even though the file extension is .ts.
 (function () {
+    // Keep this aligned with the textarea maxlength and backend request schema.
     const MAX_TEXT_LENGTH = 3000;
 
     function initPredictionForm() {
@@ -10,6 +24,7 @@
 
         if (!form || !textInput || !characterCount || !button || !output) return;
 
+        // Count the raw textarea value so the counter matches what users typed.
         function updateCharacterCount() {
             characterCount.textContent = textInput.value.length + '/' + MAX_TEXT_LENGTH + ' characters';
         }
@@ -36,6 +51,7 @@
             ].join('');
         }
 
+        // Escape API-provided strings before inserting them into result markup.
         function escapeHtml(value) {
             return String(value)
                 .replace(/&/g, '&amp;')
@@ -83,6 +99,7 @@
                     throw new Error(getErrorMessage(data, response.status));
                 }
 
+                // Validate the expected response shape before rendering fields.
                 if (
                     !data ||
                     typeof data.prediction !== 'string' ||
@@ -107,6 +124,8 @@
         textInput.addEventListener('input', updateCharacterCount);
     }
 
+    // The script is currently placed at the end of the body, but this keeps it
+    // safe if the template placement changes later.
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initPredictionForm);
     } else {
