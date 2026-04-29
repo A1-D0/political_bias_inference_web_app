@@ -1,11 +1,18 @@
 (function () {
+    const MAX_TEXT_LENGTH = 3000;
+
     function initPredictionForm() {
         const form = document.getElementById('prediction-form');
         const textInput = document.getElementById('article-text');
+        const characterCount = document.getElementById('article-character-count');
         const button = document.getElementById('predict-button');
         const output = document.getElementById('prediction-output');
 
-        if (!form || !textInput || !button || !output) return;
+        if (!form || !textInput || !characterCount || !button || !output) return;
+
+        function updateCharacterCount() {
+            characterCount.textContent = textInput.value.length + '/' + MAX_TEXT_LENGTH + ' characters';
+        }
 
         function setOutput(message, state) {
             output.className = 'prediction-output';
@@ -95,6 +102,9 @@
                 button.disabled = false;
             }
         });
+
+        updateCharacterCount();
+        textInput.addEventListener('input', updateCharacterCount);
     }
 
     if (document.readyState === 'loading') {

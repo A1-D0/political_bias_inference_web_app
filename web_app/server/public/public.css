@@ -69,6 +69,13 @@ textarea:focus {
     outline: 3px solid rgba(31, 111, 235, 0.16);
 }
 
+.character-count {
+    margin-top: -6px;
+    color: #536075;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
 button {
     width: fit-content;
     min-height: 44px;

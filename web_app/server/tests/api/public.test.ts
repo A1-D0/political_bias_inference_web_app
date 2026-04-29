@@ -23,6 +23,7 @@ describe('GET /predict', () => {
 });
 
 type ElementState = {
+    addEventListener?: jest.Mock;
     className: string;
     disabled?: boolean;
     focus?: jest.Mock;
@@ -54,15 +55,20 @@ function createElementState(overrides: Partial<ElementState> = {}): ElementState
 
 function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
     let submitHandler: ((event: { preventDefault: jest.Mock }) => Promise<void>) | undefined;
+    let inputHandler: (() => void) | undefined;
     const form = {
         addEventListener: jest.fn((eventName: string, handler: typeof submitHandler) => {
             if (eventName === 'submit') submitHandler = handler;
         }),
     };
     const textInput = createElementState({
+        addEventListener: jest.fn((eventName: string, handler: () => void) => {
+            if (eventName === 'input') inputHandler = handler;
+        }),
         focus: jest.fn(),
         value: textValue,
     });
+    const characterCount = createElementState();
     const button = createElementState({
         disabled: false,
     });
@@ -70,6 +76,7 @@ function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
     const elementsById: Record<string, unknown> = {
         'prediction-form': form,
         'article-text': textInput,
+        'article-character-count': characterCount,
         'predict-button': button,
         'prediction-output': output,
     };
@@ -97,7 +104,9 @@ function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
 
     return {
         button,
+        characterCount,
         fetchMock,
+        input: () => inputHandler!(),
         output,
         submit: () => submitHandler!({ preventDefault: jest.fn() }),
         textInput,
@@ -161,5 +170,32 @@ describe('prediction UI browser behavior', () => {
         expect(harness.output.className).toBe('prediction-output error');
         expect(harness.output.textContent).toBe('Please enter text before requesting a prediction.');
         expect(harness.textInput.focus).toHaveBeenCalled();
+    });
+
+    it('shows the empty character count on load', () => {
+        const fetchMock = jest.fn();
+        const harness = createPredictionUIHarness('', fetchMock);
+
+        expect(harness.characterCount.textContent).toBe('0/3000 characters');
+    });
+
+    it('updates the character count for entered text', () => {
+        const fetchMock = jest.fn();
+        const harness = createPredictionUIHarness('', fetchMock);
+
+        harness.textInput.value = 'hello world';
+        harness.input();
+
+        expect(harness.characterCount.textContent).toBe('11/3000 characters');
+    });
+
+    it('shows the max character count for max-length text', () => {
+        const fetchMock = jest.fn();
+        const harness = createPredictionUIHarness('', fetchMock);
+
+        harness.textInput.value = 'a'.repeat(3000);
+        harness.input();
+
+        expect(harness.characterCount.textContent).toBe('3000/3000 characters');
     });
 });
