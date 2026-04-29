@@ -1,90 +1,105 @@
 (function () {
-    const form = document.getElementById('prediction-form');
-    const textInput = document.getElementById('article-text');
-    const button = document.getElementById('predict-button');
-    const output = document.getElementById('prediction-output');
+    function initPredictionForm() {
+        const form = document.getElementById('prediction-form');
+        const textInput = document.getElementById('article-text');
+        const button = document.getElementById('predict-button');
+        const output = document.getElementById('prediction-output');
 
-    function setOutput(message, state) {
-        output.className = 'prediction-output';
-        if (state) output.classList.add(state);
-        output.textContent = message;
-    }
+        if (!form || !textInput || !button || !output) return;
 
-    function setResult(data) {
-        output.className = 'prediction-output success';
-        output.innerHTML = [
-            '<dl>',
-            '<dt>Prediction</dt>',
-            '<dd>' + escapeHtml(data.prediction) + '</dd>',
-            '<dt>Model version</dt>',
-            '<dd>' + escapeHtml(data.model_version) + '</dd>',
-            '<dt>Label encoder version</dt>',
-            '<dd>' + escapeHtml(data.label_encoder_version) + '</dd>',
-            '</dl>',
-        ].join('');
-    }
-
-    function escapeHtml(value) {
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function getErrorMessage(data, status) {
-        if (data && typeof data.error === 'string') return data.error;
-        return 'Prediction request failed with status ' + status + '.';
-    }
-
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-
-        const text = textInput.value.trim();
-        if (!text) {
-            setOutput('Please enter text before requesting a prediction.', 'error');
-            textInput.focus();
-            return;
+        function setOutput(message, state) {
+            output.className = 'prediction-output';
+            output.innerHTML = '';
+            if (state) output.classList.add(state);
+            output.textContent = message;
         }
 
-        button.disabled = true;
-        setOutput('Loading prediction...', 'loading');
+        function setResult(data) {
+            output.className = 'prediction-output success';
+            output.textContent = '';
+            output.innerHTML = [
+                '<dl>',
+                '<dt>Prediction</dt>',
+                '<dd>' + escapeHtml(data.prediction) + '</dd>',
+                '<dt>Model version</dt>',
+                '<dd>' + escapeHtml(data.model_version) + '</dd>',
+                '<dt>Label encoder version</dt>',
+                '<dd>' + escapeHtml(data.label_encoder_version) + '</dd>',
+                '</dl>',
+            ].join('');
+        }
 
-        try {
-            const response = await fetch('/api/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: text }),
-            });
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-            let data = null;
+        function getErrorMessage(data, status) {
+            if (data && typeof data.error === 'string') return data.error;
+            return 'Prediction request failed with status ' + status + '.';
+        }
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const text = textInput.value.trim();
+            if (!text) {
+                setOutput('Please enter text before requesting a prediction.', 'error');
+                textInput.focus();
+                return;
+            }
+
+            button.disabled = true;
+            setOutput('Loading prediction...', 'loading');
+
             try {
-                data = await response.json();
-            } catch (_error) {
-                throw new Error('Prediction response was not valid JSON.');
-            }
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text }),
+                });
 
-            if (!response.ok) {
-                throw new Error(getErrorMessage(data, response.status));
-            }
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (_error) {
+                    throw new Error('Prediction response was not valid JSON.');
+                }
 
-            if (
-                !data ||
-                typeof data.prediction !== 'string' ||
-                typeof data.model_version !== 'string' ||
-                typeof data.label_encoder_version !== 'string'
-            ) {
-                throw new Error('Prediction response was missing expected fields.');
-            }
+                if (!response.ok) {
+                    throw new Error(getErrorMessage(data, response.status));
+                }
 
-            setResult(data);
-        } catch (error) {
-            setOutput(error.message || 'Unable to fetch prediction.', 'error');
-        } finally {
-            button.disabled = false;
-        }
-    });
+                if (
+                    !data ||
+                    typeof data.prediction !== 'string' ||
+                    typeof data.model_version !== 'string' ||
+                    typeof data.label_encoder_version !== 'string'
+                ) {
+                    throw new Error('Prediction response was missing expected fields.');
+                }
+
+                setResult(data);
+            } catch (error) {
+                const message = error && error.message
+                    ? error.message
+                    : 'Unable to fetch prediction.';
+                setOutput(message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPredictionForm);
+    } else {
+        initPredictionForm();
+    }
 })();

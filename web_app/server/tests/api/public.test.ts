@@ -1,4 +1,7 @@
+import fs from 'fs';
+import path from 'path';
 import request from 'supertest';
+import vm from 'vm';
 import app from '../../src/app';
 
 describe('GET /predict', () => {
@@ -16,5 +19,147 @@ describe('GET /predict', () => {
         expect(res.text).toContain('<script>');
         expect(res.text).not.toContain('{{PUBLIC_CSS}}');
         expect(res.text).not.toContain('{{PUBLIC_SCRIPT}}');
+    });
+});
+
+type ElementState = {
+    className: string;
+    disabled?: boolean;
+    focus?: jest.Mock;
+    innerHTML: string;
+    textContent: string;
+    value?: string;
+    classList: {
+        add: jest.Mock;
+    };
+};
+
+function createElementState(overrides: Partial<ElementState> = {}): ElementState {
+    const element: ElementState = {
+        className: '',
+        innerHTML: '',
+        textContent: '',
+        classList: {
+            add: jest.fn((className: string) => {
+                element.className = element.className
+                    ? `${element.className} ${className}`
+                    : className;
+            }),
+        },
+        ...overrides,
+    };
+
+    return element;
+}
+
+function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
+    let submitHandler: ((event: { preventDefault: jest.Mock }) => Promise<void>) | undefined;
+    const form = {
+        addEventListener: jest.fn((eventName: string, handler: typeof submitHandler) => {
+            if (eventName === 'submit') submitHandler = handler;
+        }),
+    };
+    const textInput = createElementState({
+        focus: jest.fn(),
+        value: textValue,
+    });
+    const button = createElementState({
+        disabled: false,
+    });
+    const output = createElementState();
+    const elementsById: Record<string, unknown> = {
+        'prediction-form': form,
+        'article-text': textInput,
+        'predict-button': button,
+        'prediction-output': output,
+    };
+    const documentMock = {
+        readyState: 'complete',
+        addEventListener: jest.fn(),
+        getElementById: jest.fn((id: string) => elementsById[id] || null),
+    };
+    const script = fs.readFileSync(
+        path.join(process.cwd(), 'public', 'public.ts'),
+        'utf8',
+    );
+
+    vm.runInNewContext(script, {
+        document: documentMock,
+        Error,
+        fetch: fetchMock,
+        JSON,
+        String,
+    });
+
+    if (!submitHandler) {
+        throw new Error('Prediction form submit handler was not registered.');
+    }
+
+    return {
+        button,
+        fetchMock,
+        output,
+        submit: () => submitHandler!({ preventDefault: jest.fn() }),
+        textInput,
+    };
+}
+
+describe('prediction UI browser behavior', () => {
+    it('posts text to /api/predict and renders a successful prediction', async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                prediction: 'center',
+                model_version: 'model_v1',
+                label_encoder_version: 'encoder_v1',
+            }),
+        });
+        const harness = createPredictionUIHarness(' Article text for prediction ', fetchMock);
+
+        await harness.submit();
+
+        expect(fetchMock).toHaveBeenCalledWith('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: 'Article text for prediction' }),
+        });
+        expect(harness.output.className).toBe('prediction-output success');
+        expect(harness.output.innerHTML).toContain('center');
+        expect(harness.output.innerHTML).toContain('model_v1');
+        expect(harness.output.innerHTML).toContain('encoder_v1');
+        expect(harness.button.disabled).toBe(false);
+    });
+
+    it('renders an API error when prediction fails', async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: false,
+            status: 400,
+            json: async () => ({ error: 'Invalid request data' }),
+        });
+        const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
+
+        await harness.submit();
+
+        expect(fetchMock).toHaveBeenCalledWith('/api/predict', expect.objectContaining({
+            body: JSON.stringify({ text: 'Article text for prediction' }),
+        }));
+        expect(harness.output.className).toBe('prediction-output error');
+        expect(harness.output.textContent).toBe('Invalid request data');
+        expect(harness.button.disabled).toBe(false);
+    });
+
+    it('does not call the API for empty text input', async () => {
+        const fetchMock = jest.fn();
+        const harness = createPredictionUIHarness('   ', fetchMock);
+
+        await harness.submit();
+
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(harness.output.className).toBe('prediction-output error');
+        expect(harness.output.textContent).toBe('Please enter text before requesting a prediction.');
+        expect(harness.textInput.focus).toHaveBeenCalled();
     });
 });
