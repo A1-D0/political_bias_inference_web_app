@@ -12,10 +12,13 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 
-/**
- * Serves the prediction UI from the public files without adding separate
- * CSS or JavaScript asset endpoints.
- */
+/*
+    * Serve the prediction UI by inlining public HTML, CSS, and browser script files.
+    * @param {Request} _req - Express request object. Unused because this route has no request inputs.
+    * @param {Response} res - Express response object used to send the rendered HTML page.
+    * @returns {Response} - HTML response containing the prediction UI.
+    * @throws {Error} - Throws if any required public UI file cannot be read.
+*/
 export function predictionUI(_req: Request, res: Response) {
     const publicDir = path.join(process.cwd(), 'public');
     const html = fs.readFileSync(path.join(publicDir, 'public.html'), 'utf8');

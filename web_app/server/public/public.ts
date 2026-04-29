@@ -15,6 +15,10 @@
     // Keep this aligned with the textarea maxlength and backend request schema.
     const MAX_TEXT_LENGTH = 3000;
 
+    /*
+        * Initialize the prediction form behavior after required DOM elements are available.
+        * @returns {void}
+    */
     function initPredictionForm() {
         const form = document.getElementById('prediction-form');
         const textInput = document.getElementById('article-text');
@@ -24,11 +28,20 @@
 
         if (!form || !textInput || !characterCount || !button || !output) return;
 
-        // Count the raw textarea value so the counter matches what users typed.
+        /*
+            * Update the visible character counter using the raw textarea value length.
+            * @returns {void}
+        */
         function updateCharacterCount() {
             characterCount.textContent = textInput.value.length + '/' + MAX_TEXT_LENGTH + ' characters';
         }
 
+        /*
+            * Render a status or error message in the prediction output area.
+            * @param {string} message - Message to display to the user.
+            * @param {string} state - Optional CSS state class, such as "loading" or "error".
+            * @returns {void}
+        */
         function setOutput(message, state) {
             output.className = 'prediction-output';
             output.innerHTML = '';
@@ -36,6 +49,11 @@
             output.textContent = message;
         }
 
+        /*
+            * Render a successful prediction response in the output area.
+            * @param {object} data - Prediction response from /api/predict.
+            * @returns {void}
+        */
         function setResult(data) {
             output.className = 'prediction-output success';
             output.textContent = '';
@@ -51,7 +69,11 @@
             ].join('');
         }
 
-        // Escape API-provided strings before inserting them into result markup.
+        /*
+            * Escape text before inserting API-provided values into HTML markup.
+            * @param {*} value - Value to convert to escaped HTML text.
+            * @returns {string} - HTML-safe string.
+        */
         function escapeHtml(value) {
             return String(value)
                 .replace(/&/g, '&amp;')
@@ -61,11 +83,24 @@
                 .replace(/'/g, '&#039;');
         }
 
+        /*
+            * Get the best user-facing error message for a failed prediction response.
+            * "Best" means preferring a specific backend-provided error string when
+            * available, then falling back to a generic HTTP status message so the UI
+            * still gives clear feedback when the response body has no usable error.
+            * @param {object|null} data - Parsed response body, if available.
+            * @param {number} status - HTTP response status code.
+            * @returns {string} - Error message to display.
+        */
         function getErrorMessage(data, status) {
             if (data && typeof data.error === 'string') return data.error;
             return 'Prediction request failed with status ' + status + '.';
         }
 
+        /*
+            * Submit article text to POST /api/predict, show loading state, and render
+            * either the prediction result or an error message.
+        */
         form.addEventListener('submit', async function (event) {
             event.preventDefault();
 

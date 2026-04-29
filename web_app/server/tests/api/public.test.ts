@@ -45,6 +45,11 @@ type ElementState = {
     };
 };
 
+/*
+    * Create a lightweight mocked DOM element for executing the browser script in tests.
+    * @param {Partial<ElementState>} overrides - Element fields to override for a test case.
+    * @returns {ElementState} - Mocked element state used by the UI test harness.
+*/
 function createElementState(overrides: Partial<ElementState> = {}): ElementState {
     const element: ElementState = {
         className: '',
@@ -63,8 +68,13 @@ function createElementState(overrides: Partial<ElementState> = {}): ElementState
     return element;
 }
 
-// Runs the real browser script in a small mocked DOM so tests cover the client
-// behavior without duplicating public.ts logic or adding a DOM test dependency.
+/*
+    * Execute the real public.ts browser script in a mocked DOM environment.
+    * @param {string} textValue - Initial textarea value for the test case.
+    * @param {jest.Mock} fetchMock - Mock fetch implementation used by the script.
+    * @returns {object} - Test harness exposing mocked elements and captured event handlers.
+    * @throws {Error} - Throws if the script does not register the submit handler.
+*/
 function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
     let submitHandler: ((event: { preventDefault: jest.Mock }) => Promise<void>) | undefined;
     let inputHandler: (() => void) | undefined;

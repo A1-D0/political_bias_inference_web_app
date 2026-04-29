@@ -45,7 +45,7 @@
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026 
-# Date Modified: February 23, 2026 
+# Date Modified: April 28, 2026 
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine

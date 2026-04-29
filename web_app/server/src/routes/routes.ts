@@ -7,11 +7,13 @@ import { MLInferenceRequestSchema } from '@usnewsweb/shared/schemas/MLInference'
 import { rateLimiter } from '../middleware/rateLimiter';
 import { predictionUI } from './predictUI';
 
-/**
-    * Routes Module
-    * This module defines the routes for the Express application.
-    *
-    * @param app - Express application instance
+/*
+    * Register application routes.
+    * API routes:
+    * GET /predict - Serves the prediction UI.
+    * POST /api/predict - Accepts article text and returns prediction results.
+    * @param {Express} app - Express application instance where routes are mounted.
+    * @returns {void}
 */
 function routes(app: Express) {
     app.get('/', indexController);
