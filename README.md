@@ -151,7 +151,7 @@ Return the browser-cached version of the UI-prediction page if the client has a 
 
 Response status: 200
 
-Response could be either a simple HTML page or a JSON response with HTML code of the newest version of the landing page.
+Response could be either a simple HTML page or a JSON response with HTML code of the newest version of the UI page.
 
 </details>
 
