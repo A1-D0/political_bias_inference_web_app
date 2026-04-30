@@ -12,7 +12,7 @@
 // This file is inlined into public.html and executed directly by the browser.
 // Keep it as vanilla JavaScript even though the file extension is .ts.
 (function () {
-    // Keep this aligned with the textarea maxlength and backend request schema.
+    // Single UI-side source of truth for textarea length and counter display.
     const MAX_TEXT_LENGTH = 3000;
 
     /*
@@ -27,6 +27,8 @@
         const output = document.getElementById('prediction-output');
 
         if (!form || !textInput || !characterCount || !button || !output) return;
+
+        textInput.maxLength = MAX_TEXT_LENGTH;
 
         /*
             * Update the visible character counter using the raw textarea value length.

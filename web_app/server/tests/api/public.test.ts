@@ -38,6 +38,7 @@ type ElementState = {
     disabled?: boolean;
     focus?: jest.Mock;
     innerHTML: string;
+    maxLength?: number;
     textContent: string;
     value?: string;
     classList: {
@@ -88,6 +89,7 @@ function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
             if (eventName === 'input') inputHandler = handler;
         }),
         focus: jest.fn(),
+        maxLength: -1,
         value: textValue,
     });
     const characterCount = createElementState();
@@ -200,6 +202,13 @@ describe('prediction UI browser behavior', () => {
         const harness = createPredictionUIHarness('', fetchMock);
 
         expect(harness.characterCount.textContent).toBe('0/3000 characters');
+    });
+
+    it('sets the textarea max length from the browser script constant', () => {
+        const fetchMock = jest.fn();
+        const harness = createPredictionUIHarness('', fetchMock);
+
+        expect(harness.textInput.maxLength).toBe(3000);
     });
 
     it('updates the character count for entered text', () => {
