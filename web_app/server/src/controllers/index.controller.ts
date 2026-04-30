@@ -8,7 +8,7 @@ async function indexController(req: Request, res: Response) {
     const html = `
         <html>
           <head>
-            <title>News Bias Inference API</title>
+            <title>Political Bias Inference API</title>
             <style>
               body { 
                   background: #f0f0f0;
@@ -27,7 +27,7 @@ async function indexController(req: Request, res: Response) {
           </head>
 
           <body>
-            <h1>News Bias Inference API</h1>
+            <h1>Political Bias Inference API</h1>
             <p>Built with Python, TypeScript, Docker, AWS App Runner.</p>
 
             <p><b>Note: This web API is only available during weekdays from 9 AM to 4 PM (Eastern Time).</b></p>
@@ -42,6 +42,12 @@ async function indexController(req: Request, res: Response) {
             <h2>Endpoints</h2>
             <h3>GET /</h3>
             <p>Landing page with API overview and usage instructions (i.e., this page).</p>
+            <p><b>Response:</b></p>
+            <p>Response status: 304</p>
+            <p>Gets the cached version of the page from the browser if available and unmodified on the server.</p>
+            <p>Response status: 200</p>
+            <p>Returns the updated landing page.</p>
+
 
             <h3>GET /health</h3>
             <p>Health check endpoint. Returns JSON with service status and uptime.</p>
@@ -56,7 +62,15 @@ async function indexController(req: Request, res: Response) {
 }
 </pre>
 
-            <h3>POST /predict</h3>
+            <h3>GET /predict</h3>
+            <p>Loads a page for UI-based text inputs.</p>
+            <p><b>Response:</b></p>
+            <p>Response status: 304</p>
+            <p>Gets the cached version of the page from the browser if available and unmodified on the server.</p>
+            <p>Response status: 200</p>
+            <p>Returns the updated prediction UI page.</p>
+
+            <h3>POST /api/predict</h3>
             <p>Accepts JSON with a news article text and returns bias inference results.</p>
             <p><b>Required headers:</b></p>
             <pre>
@@ -110,13 +124,21 @@ X-Internal-API-Key: &lt;api_key&gt;
 
             <h2>How to Use The API</h2>
             <p>Use the following curl commands to test the API in the CLI:</p>
+            <p><b>GET /:</b></p>
+            <pre>curl -X GET https://api.osvaldohernandez.dev/</pre>
+
             <p><b>GET /health:</b></p>
             <pre>curl -X GET https://api.osvaldohernandez.dev/health</pre>
-            <p><b>POST /predict:</b></p>
+
+            <p><b>GET /predict:</b></p>
+            <pre>curl -X GET https://api.osvaldohernandez.dev/predict</pre>
+
+            <p><b>POST /api/predict:</b></p>
+
             <pre>
 TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
 
-curl -X POST https://api.osvaldohernandez.dev/predict \\
+curl -X POST https://api.osvaldohernandez.dev/api/predict \\
 -H "Content-Type: application/json" \\
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
 </pre>
