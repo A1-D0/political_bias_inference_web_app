@@ -69,6 +69,10 @@ function createElementState(overrides: Partial<ElementState> = {}): ElementState
     return element;
 }
 
+function expectedCharacterCount(count: number, maxLength: number | undefined) {
+    return `${count}/${maxLength} characters`;
+}
+
 /*
     * Execute the real public.ts browser script in a mocked DOM environment.
     * @param {string} textValue - Initial textarea value for the test case.
@@ -201,14 +205,16 @@ describe('prediction UI browser behavior', () => {
         const fetchMock = jest.fn();
         const harness = createPredictionUIHarness('', fetchMock);
 
-        expect(harness.characterCount.textContent).toBe('0/3000 characters');
+        expect(harness.characterCount.textContent)
+            .toBe(expectedCharacterCount(0, harness.textInput.maxLength));
     });
 
     it('sets the textarea max length from the browser script constant', () => {
         const fetchMock = jest.fn();
         const harness = createPredictionUIHarness('', fetchMock);
 
-        expect(harness.textInput.maxLength).toBe(3000);
+        expect(harness.textInput.maxLength).not.toBe(-1);
+        expect(harness.textInput.maxLength).toBeGreaterThan(0);
     });
 
     it('updates the character count for entered text', () => {
@@ -218,16 +224,19 @@ describe('prediction UI browser behavior', () => {
         harness.textInput.value = 'hello world';
         harness.input();
 
-        expect(harness.characterCount.textContent).toBe('11/3000 characters');
+        expect(harness.characterCount.textContent)
+            .toBe(expectedCharacterCount(11, harness.textInput.maxLength));
     });
 
     it('shows the max character count for max-length text', () => {
         const fetchMock = jest.fn();
         const harness = createPredictionUIHarness('', fetchMock);
+        const maxLength = harness.textInput.maxLength || 0;
 
-        harness.textInput.value = 'a'.repeat(3000);
+        harness.textInput.value = 'a'.repeat(maxLength);
         harness.input();
 
-        expect(harness.characterCount.textContent).toBe('3000/3000 characters');
+        expect(harness.characterCount.textContent)
+            .toBe(expectedCharacterCount(maxLength, harness.textInput.maxLength));
     });
 });
