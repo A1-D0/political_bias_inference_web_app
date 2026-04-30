@@ -147,7 +147,7 @@ UI page for users to interact with the API and submit text for bias inference.
 
 Response status: 304 
 
-Return the browser-cached version of the UI-prediction page if the client has a cached version available, otherwise return the landing page content.
+Return the browser-cached version of the UI-prediction page if the client has a cached version available, otherwise return the UI page content.
 
 Response status: 200
 
