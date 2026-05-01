@@ -5,7 +5,7 @@
     *
     * Author: Osvaldo Hernandez-Segura
     * Date Created: April 28, 2026
-    * Date Modified: April 28, 2026
+    * Date Modified: April 30, 2026
     * References: Copilot, ChatGPT, Express documentation
 */
 import { Request, Response } from 'express';
@@ -19,6 +19,8 @@ import path from 'path';
     * @throws {Error} - Throws if any required public UI file cannot be read.
 */
 function renderPredictionUI(): string {
+    // Public assets are resolved from the server package root
+    // The server is expected to be launched from web_app/server so long as process.cwd() is not changed
     const publicDir = path.join(process.cwd(), 'public');
     const html = fs.readFileSync(path.join(publicDir, 'public.html'), 'utf8');
     const css = fs.readFileSync(path.join(publicDir, 'public.css'), 'utf8');
