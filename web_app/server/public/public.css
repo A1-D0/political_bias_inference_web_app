@@ -1,0 +1,170 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f5f7fb;
+    color: #172033;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.page-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 16px;
+}
+
+.prediction-panel {
+    width: min(100%, 760px);
+    background: #ffffff;
+    border: 1px solid #d9e0ea;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+}
+
+.header-group {
+    margin-bottom: 24px;
+}
+
+h1 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+p {
+    margin: 0;
+    color: #536075;
+    line-height: 1.5;
+}
+
+.prediction-form {
+    display: grid;
+    gap: 14px;
+}
+
+label {
+    font-weight: 700;
+}
+
+textarea {
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    border: 1px solid #bac5d5;
+    border-radius: 6px;
+    padding: 14px;
+    color: #172033;
+    font: inherit;
+    line-height: 1.5;
+}
+
+textarea:focus {
+    border-color: #1f6feb;
+    outline: 3px solid rgba(31, 111, 235, 0.16);
+}
+
+.character-count {
+    margin-top: -6px;
+    color: #536075;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+button {
+    width: fit-content;
+    min-height: 44px;
+    border: 0;
+    border-radius: 6px;
+    padding: 0 18px;
+    background: #1f6feb;
+    color: #ffffff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+button:hover {
+    background: #195fc8;
+}
+
+button:disabled {
+    background: #8ca8d8;
+    cursor: not-allowed;
+}
+
+.prediction-output {
+    min-height: 48px;
+    border-radius: 6px;
+    padding: 14px;
+    background: #eef3fb;
+    color: #172033;
+    line-height: 1.5;
+}
+
+.prediction-output:empty {
+    display: none;
+}
+
+.prediction-output.error {
+    background: #fff0f0;
+    color: #9b1c1c;
+}
+
+.prediction-output.success {
+    background: #edf8f2;
+    color: #185c37;
+}
+
+.prediction-output.loading {
+    background: #eef3fb;
+    color: #364761;
+}
+
+.prediction-output dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 12px;
+    margin: 0;
+}
+
+.prediction-output dt {
+    font-weight: 700;
+}
+
+.prediction-output dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .page-shell {
+        align-items: flex-start;
+        padding: 20px 12px;
+    }
+
+    .prediction-panel {
+        padding: 22px 16px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    textarea {
+        min-height: 180px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .prediction-output dl {
+        grid-template-columns: 1fr;
+    }
+}

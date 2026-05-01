@@ -18,11 +18,11 @@ GET /health:
 ```bash
 curl -X GET https://api.osvaldohernandez.dev/health
 ```
-POST /predict:
+POST /api/predict:
 ```bash
 TEXT="President Donald Trump's plane, Air Force One, returned to Joint Base Andrews about an hour after departing for Switzerland on Tuesday evening. White House press secretary Karoline Leavitt said the decision to return was made after takeoff when the crew aboard Air Force One identified a minor electrical issue and, out of an abundance of caution, decided to turn around.\\\\n\\\\nA reporter on board said the lights in the press cabin of the aircraft went out briefly after takeoff, but no explanation was immediately offered."
 
-curl -X POST https://api.osvaldohernandez.dev/predict \
+curl -X POST https://api.osvaldohernandez.dev/api/predict \
 -H "Content-Type: application/json" \
 -d "$(jq -n --arg text "$TEXT" '{text: $text}')"
 ```
@@ -31,7 +31,7 @@ curl -X POST https://api.osvaldohernandez.dev/predict \
 - Using cron jobs scheduled with AWS EventBridge, the two services are automatically started at 9:00 am and stopped at 4:00 pm (Eastern Time) on weekdays using AWS Lambda functions.
 - The AWS Lambda Start/Update function starts the AWS App Runner instances and updates the instances with the latest Docker images from AWS ECR. The Lambda Stop function stops the App Runner instances.
 - The system is deployed on AWS App Runner as two services: a backend API and an ML inference service. 
-- The backend API handles incoming requests, such as POST /predict, performs input validation, and forwards valid requests to the ML inference service. 
+- The backend API handles incoming requests, such as POST /api/predict, performs input validation, and forwards valid requests to the ML inference service. 
 - The ML inference service loads the machine learning model and label encoder artifacts from AWS S3 at startup, performs inference on the input text, and returns the prediction results back to the backend API, which sends the response to the client. 
 - Logs from all AWS services, such as error logs, are collected and stored in AWS CloudWatch for monitoring and debugging purposes.
 - Cloudflare is used for DNS management, routing incoming requests and responses between the user and the backend API.
@@ -82,7 +82,7 @@ The deployment flow of the web app is as follows:
 
 ## Request-Response flow
 The Request-Response flow of the web app for a "happy path" is as follows:
-1. The user enacts the POST /predict endpoint, sending a request with the JSON text payload. 
+1. The user enacts the POST /api/predict endpoint, sending a request with the JSON text payload. 
 2. Cloudflare receives the request and forwards it to the backend API.
 3. The backend API handles the request, performing a per-IP rate limit check and input validation on the request data. 
 4. If the rate limit hasn't been reached and the input data is valid, the backend API sends a request to the ML inference service. 
@@ -107,9 +107,13 @@ Landing page with API overview and usage instructions.
 
 **Response**:
 
+Response status: 304 
+
+Return the browser-cached version of the landing page if the client has a cached version available, otherwise return the landing page content.
+
 Response status: 200
 
-Response could be either a simple HTML page or a JSON response with HTML code for the landing page.
+Response could be either a simple HTML page or a JSON response with HTML code of the newest version of the landing page.
 
 </details>
 
@@ -134,9 +138,27 @@ Response status: 200
 </details>
 
 <details>
-    <summary>POST /predict</summary>
+    <summary>GET /predict</summary>
 
-### POST /predict
+### GET /predict
+UI page for users to interact with the API and submit text for bias inference.
+
+**Response**:
+
+Response status: 304 
+
+Return the browser-cached version of the UI-prediction page if the client has a cached version available, otherwise return the UI page content.
+
+Response status: 200
+
+Response could be either a simple HTML page or a JSON response with HTML code of the newest version of the UI page.
+
+</details>
+
+<details>
+    <summary>POST /api/predict</summary>
+
+### POST /api/predict
 Accepts JSON with a news article text and returns bias inference results.
 
 **Required headers**:

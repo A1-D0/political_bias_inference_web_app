@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Bias Prediction</title>
+    <style>
+{{PUBLIC_CSS}}
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <section class="prediction-panel" aria-labelledby="page-title">
+            <div class="header-group">
+                <h1 id="page-title">News Bias Prediction</h1>
+                <p>Paste U.S.-context news text to estimate its political bias.</p>
+            </div>
+
+            <form id="prediction-form" class="prediction-form">
+                <label for="article-text">Article text</label>
+                <textarea
+                    id="article-text"
+                    name="text"
+                    rows="10"
+                    placeholder="Paste article text here..."
+                    required
+                ></textarea>
+                <div id="article-character-count" class="character-count"></div>
+
+                <button id="predict-button" type="submit">Get Prediction</button>
+
+                <div
+                    id="prediction-output"
+                    class="prediction-output"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+{{PUBLIC_SCRIPT}}
+    </script>
+</body>
+</html>

@@ -45,7 +45,7 @@
 #
 # Author: Osvaldo Hernandez-Segura
 # Date Created: February 12, 2026 
-# Date Modified: February 23, 2026 
+# Date Modified: April 28, 2026 
 # References: Copilot, ChatGPT, Docker Documentation
 
 FROM node:20-alpine
@@ -54,6 +54,7 @@ FROM node:20-alpine
 WORKDIR /app
 COPY shared ./shared
 COPY server/src ./server/src
+COPY server/public ./server/public
 COPY server/tsconfig.json /app/server/tsconfig.json
 
 # install production dependencies
@@ -76,4 +77,3 @@ EXPOSE 3000
 ENTRYPOINT ["/app/server/entrypoint.server.sh"]
 
 CMD ["npm", "start"]
-

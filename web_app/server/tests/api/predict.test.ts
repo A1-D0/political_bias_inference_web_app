@@ -14,7 +14,7 @@ import request from 'supertest';
 import mockPredict from '../helpers/mockPredict.helper';
 import logger from '../../src/utils/logger.utils';
 
-describe("POST /predict", () => {
+describe("POST /api/predict", () => {
     let app: any;
     let loggerInfoSpy: jest.SpyInstance;
 
@@ -34,7 +34,7 @@ describe("POST /predict", () => {
     // Simple valid prediction text
     it("should return 200 and prediction for valid input", async () => {
         const res = await request(app)
-            .post('/predict')
+            .post('/api/predict')
             .set('X-Request-Id', 'req_test123456')
             .set('Content-Type', 'application/json')
             .send({ text: "This is a test input for prediction." });
@@ -69,7 +69,7 @@ describe("POST /predict", () => {
             event: 'request_completed',
             request_id: 'req_test123456',
             method: 'POST',
-            route: '/predict',
+            route: '/api/predict',
             status_code: 200,
             client_ip_hash: expect.any(String),
             user_agent: expect.any(String),
@@ -90,7 +90,7 @@ describe("POST /predict", () => {
     // sending a number instead of a string, or another field instead of "text"
     it("should return 400 if text field is missing (less than 1 char)", async () => {
         const res = await request(app)
-            .post('/predict')
+            .post('/api/predict')
             .set('Content-Type', 'application/json')
             .send({ text: "" });
         
@@ -101,7 +101,7 @@ describe("POST /predict", () => {
 
     it("should log request completion when malformed JSON fails before route handling", async () => {
         const res = await request(app)
-            .post('/predict')
+            .post('/api/predict')
             .set('X-Request-Id', 'req_badjson123')
             .set('Content-Type', 'application/json')
             .send('{"text":');
@@ -115,7 +115,7 @@ describe("POST /predict", () => {
             event: 'request_completed',
             request_id: 'req_badjson123',
             method: 'POST',
-            route: '/predict',
+            route: '/api/predict',
             status_code: 400,
             client_ip_hash: expect.any(String),
             user_agent: expect.any(String),
@@ -133,7 +133,7 @@ describe("POST /predict", () => {
     // Check for invalid response 
     it("should return 500 if prediction response format is invalid", async () => {
         const res = await request(app)
-            .post('/predict')
+            .post('/api/predict')
             .set('Content-Type', 'application/json')
             .send({ text: "This is a test input to return an erroneous prediction response." });
         
