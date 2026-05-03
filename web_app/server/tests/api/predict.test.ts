@@ -7,7 +7,7 @@
     *
     * Author: Osvaldo Hernandez-Segura
     * Date Created: February 1, 2026
-    * Date Modified: April 24, 2026
+    * Date Modified: May 2, 2026
     * References: Copilot, ChatGPT, GeeksForGeeks, StackOverflow
 */
 import request from 'supertest';
@@ -17,11 +17,13 @@ import logger from '../../src/utils/logger.utils';
 describe("POST /api/predict", () => {
     let app: any;
     let loggerInfoSpy: jest.SpyInstance;
+    let loggerErrorSpy: jest.SpyInstance;
 
     // Set up the mock predict function before each test
     beforeEach(async () => {
         mockPredict();
         loggerInfoSpy = jest.spyOn(logger, 'info').mockImplementation(() => undefined as any);
+        loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => undefined as any);
         app = (await import('../../src/app')).default; 
     });
     
@@ -91,12 +93,57 @@ describe("POST /api/predict", () => {
     it("should return 400 if text field is missing (less than 1 char)", async () => {
         const res = await request(app)
             .post('/api/predict')
+            .set('X-Request-Id', 'req_validation123')
             .set('Content-Type', 'application/json')
             .send({ text: "" });
         
         // Note that the validateResource middleware returns 400 for invalid request data
         expect(res.status).toBe(400);
         expect(res.body).toHaveProperty('error', 'Invalid request data');
+        expect(global.fetch).not.toHaveBeenCalled();
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith(expect.objectContaining({
+            service: 'backend-api',
+            event: 'request_validation_failed',
+            request_id: 'req_validation123',
+            route: '/api/predict',
+            method: 'POST',
+            status_code: 400,
+            validation_errors: expect.any(Array),
+            err: expect.objectContaining({
+                type: 'ZodError',
+                message: expect.any(String),
+                stack: expect.any(String),
+            }),
+            msg: 'request validation failed',
+        }));
+
+        const validationLog = loggerErrorSpy.mock.calls.find(([entry]) => {
+            return entry?.event === 'request_validation_failed';
+        })?.[0];
+
+        expect(JSON.stringify(validationLog)).not.toContain('This is a test input');
+    });
+
+    it("should omit invalid input text from validation failure logs", async () => {
+        const sensitiveText = 'sensitive article text '.repeat(200);
+
+        const res = await request(app)
+            .post('/api/predict')
+            .set('X-Request-Id', 'req_validation456')
+            .set('Content-Type', 'application/json')
+            .send({ text: sensitiveText });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('error', 'Invalid request data');
+
+        const validationLog = loggerErrorSpy.mock.calls.find(([entry]) => {
+            return entry?.event === 'request_validation_failed';
+        })?.[0];
+
+        expect(validationLog?.request_id).toBe('req_validation456');
+        expect(validationLog?.validation_errors).toEqual(expect.any(Array));
+        expect(JSON.stringify(validationLog)).not.toContain(sensitiveText);
     });
 
     it("should log request completion when malformed JSON fails before route handling", async () => {
