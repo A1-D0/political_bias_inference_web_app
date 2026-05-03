@@ -20,7 +20,7 @@ Date Created:
     January 20, 2026
 
 Date Modified:
-    April 24, 2026
+    May 2, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation
@@ -32,6 +32,7 @@ import pandas as pd
 import time
 import json
 import secrets
+import traceback
 
 from flask import Flask, jsonify, request, g
 from dotenv import load_dotenv
@@ -209,6 +210,25 @@ def predict_endpoint_input_validation():
         request_data = (request.get_json(force=True, silent=True) or {})
         PredictRequestBodySchema(**request_data)
     except ValidationError as e:
+        emit_log(
+            "error",
+            "predict_input_validation_failed",
+            request_id=getattr(g, "request_id", "unknown"),
+            route=request.path or "unknown",
+            method=request.method,
+            status_code=400,
+            validation_errors=e.errors(
+                include_url=False,
+                include_context=False,
+                include_input=False,
+            ),
+            err={
+                "type": type(e).__name__,
+                "message": f"{e.error_count()} validation error(s)",
+                "stack": "".join(traceback.format_tb(e.__traceback__)),
+            },
+            msg="predict input validation failed",
+        )
         return jsonify({"error": f"Input validation failed: {str(e)}"}), 400
 
 @app.before_request

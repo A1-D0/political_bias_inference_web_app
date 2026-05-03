@@ -16,7 +16,7 @@ Date Created:
     January 26, 2026
 
 Date Modified:
-    April 24, 2026
+    May 2, 2026
 
 References:
     Copilot, ChatGPT, Flask documentation, APNews article on Air Force One incident
@@ -107,11 +107,68 @@ def test_predict_invalid_api_key(client):
                        headers={"X-Internal-API-Key": "invalid-api-key"})
     assert resp.status_code == 401
 
-def test_predict_missing_text(client):
+def test_predict_missing_text(client, capsys):
     resp = client.post("/predict", 
                        json={},
-                       headers={"X-Internal-API-Key": TEST_API_KEY})
+                       headers={
+                           "X-Internal-API-Key": TEST_API_KEY,
+                           "X-Request-Id": "req_validation123",
+                       })
     assert resp.status_code == 400
+    assert "Input validation failed:" in resp.get_json()["error"]
+
+    captured = capsys.readouterr().out
+    log_lines = [
+        json.loads(line)
+        for line in captured.splitlines()
+        if line.startswith("{")
+    ]
+
+    validation_log = next(
+        log for log in log_lines
+        if log.get("event") == "predict_input_validation_failed"
+    )
+
+    assert validation_log["service"] == "ml-service"
+    assert validation_log["request_id"] == "req_validation123"
+    assert validation_log["route"] == "/predict"
+    assert validation_log["method"] == "POST"
+    assert validation_log["status_code"] == 400
+    assert isinstance(validation_log["validation_errors"], list)
+    assert validation_log["err"]["type"] == "ValidationError"
+    assert validation_log["err"]["message"]
+    assert validation_log["err"]["stack"]
+    assert validation_log["msg"] == "predict input validation failed"
+    assert "Air Force One returns" not in captured
+    assert TEST_API_KEY not in captured
+
+def test_predict_validation_log_omits_invalid_input(client, capsys):
+    sensitive_text = "sensitive article text " * 200
+
+    resp = client.post("/predict",
+                       json={"text": sensitive_text},
+                       headers={
+                           "X-Internal-API-Key": TEST_API_KEY,
+                           "X-Request-Id": "req_validation456",
+                       })
+    assert resp.status_code == 400
+
+    captured = capsys.readouterr().out
+    log_lines = [
+        json.loads(line)
+        for line in captured.splitlines()
+        if line.startswith("{")
+    ]
+
+    validation_log = next(
+        log for log in log_lines
+        if log.get("event") == "predict_input_validation_failed"
+    )
+
+    assert validation_log["request_id"] == "req_validation456"
+    assert isinstance(validation_log["validation_errors"], list)
+    assert sensitive_text not in captured
+    assert TEST_API_KEY not in captured
 
 def test_predict_missing_header(client):
     resp = client.post("/predict", 
