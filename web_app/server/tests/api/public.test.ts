@@ -5,7 +5,7 @@
     *
     * Author: Osvaldo Hernandez-Segura
     * Date Created: April 28, 2026
-    * Date Modified: April 30, 2026
+    * Date Modified: May 4, 2026
     * References: Copilot, ChatGPT, Jest documentation
 */
 import fs from 'fs';
@@ -46,6 +46,14 @@ type ElementState = {
     };
 };
 
+type FetchResponseMockOptions = {
+    bodyText: string;
+    jsonBody?: unknown;
+    jsonError?: Error;
+    ok: boolean;
+    status: number;
+};
+
 /*
     * Create a lightweight mocked DOM element for executing the browser script in tests.
     * @param {Partial<ElementState>} overrides - Element fields to override for a test case.
@@ -71,6 +79,27 @@ function createElementState(overrides: Partial<ElementState> = {}): ElementState
 
 function expectedCharacterCount(count: number, maxLength: number | undefined) {
     return `${count}/${maxLength} characters`;
+}
+
+/*
+    * Create a mocked Fetch Response for public.ts, including clone().json()
+    * because the browser script reads JSON from a clone and text from the original response.
+    * @param {FetchResponseMockOptions} options - Response status, body text, and JSON behavior.
+    * @returns {object} - Fetch-like response mock used by UI tests.
+*/
+function createFetchResponseMock(options: FetchResponseMockOptions) {
+    const json = options.jsonBody !== undefined
+        ? jest.fn().mockResolvedValue(options.jsonBody)
+        : jest.fn().mockRejectedValue(options.jsonError || new SyntaxError('Unexpected token'));
+
+    return {
+        ok: options.ok,
+        status: options.status,
+        text: jest.fn().mockResolvedValue(options.bodyText),
+        clone: jest.fn(() => ({
+            json,
+        })),
+    };
 }
 
 /*
@@ -144,15 +173,17 @@ function createPredictionUIHarness(textValue: string, fetchMock: jest.Mock) {
 
 describe('prediction UI browser behavior', () => {
     it('posts text to /api/predict and renders a successful prediction', async () => {
-        const fetchMock = jest.fn().mockResolvedValue({
+        const responseBody = {
+            prediction: 'center',
+            model_version: 'model_v1',
+            label_encoder_version: 'encoder_v1',
+        };
+        const fetchMock = jest.fn().mockResolvedValue(createFetchResponseMock({
             ok: true,
             status: 200,
-            text: async () => JSON.stringify({
-                prediction: 'center',
-                model_version: 'model_v1',
-                label_encoder_version: 'encoder_v1',
-            }),
-        });
+            bodyText: JSON.stringify(responseBody),
+            jsonBody: responseBody,
+        }));
         const harness = createPredictionUIHarness(' Article text for prediction ', fetchMock);
 
         await harness.submit();
@@ -172,11 +203,13 @@ describe('prediction UI browser behavior', () => {
     });
 
     it('renders an API error when prediction fails', async () => {
-        const fetchMock = jest.fn().mockResolvedValue({
+        const responseBody = { error: 'Invalid request data' };
+        const fetchMock = jest.fn().mockResolvedValue(createFetchResponseMock({
             ok: false,
             status: 400,
-            text: async () => JSON.stringify({ error: 'Invalid request data' }),
-        });
+            bodyText: JSON.stringify(responseBody),
+            jsonBody: responseBody,
+        }));
         const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
 
         await harness.submit();
@@ -190,11 +223,11 @@ describe('prediction UI browser behavior', () => {
     });
 
     it('renders a text error code when prediction fails with a plain text response', async () => {
-        const fetchMock = jest.fn().mockResolvedValue({
+        const fetchMock = jest.fn().mockResolvedValue(createFetchResponseMock({
             ok: false,
             status: 502,
-            text: async () => 'error code: 502',
-        });
+            bodyText: 'error code: 502',
+        }));
         const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
 
         await harness.submit();
@@ -205,11 +238,11 @@ describe('prediction UI browser behavior', () => {
     });
 
     it('renders a plain text error message when prediction fails with a text response', async () => {
-        const fetchMock = jest.fn().mockResolvedValue({
+        const fetchMock = jest.fn().mockResolvedValue(createFetchResponseMock({
             ok: false,
             status: 503,
-            text: async () => 'error: upstream unavailable',
-        });
+            bodyText: 'error: upstream unavailable',
+        }));
         const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
 
         await harness.submit();
@@ -220,11 +253,11 @@ describe('prediction UI browser behavior', () => {
     });
 
     it('requires valid JSON for successful prediction responses', async () => {
-        const fetchMock = jest.fn().mockResolvedValue({
+        const fetchMock = jest.fn().mockResolvedValue(createFetchResponseMock({
             ok: true,
             status: 200,
-            text: async () => 'prediction: center',
-        });
+            bodyText: 'prediction: center',
+        }));
         const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
 
         await harness.submit();
