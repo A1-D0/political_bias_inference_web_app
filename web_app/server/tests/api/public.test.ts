@@ -147,7 +147,7 @@ describe('prediction UI browser behavior', () => {
         const fetchMock = jest.fn().mockResolvedValue({
             ok: true,
             status: 200,
-            json: async () => ({
+            text: async () => JSON.stringify({
                 prediction: 'center',
                 model_version: 'model_v1',
                 label_encoder_version: 'encoder_v1',
@@ -175,7 +175,7 @@ describe('prediction UI browser behavior', () => {
         const fetchMock = jest.fn().mockResolvedValue({
             ok: false,
             status: 400,
-            json: async () => ({ error: 'Invalid request data' }),
+            text: async () => JSON.stringify({ error: 'Invalid request data' }),
         });
         const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
 
@@ -186,6 +186,51 @@ describe('prediction UI browser behavior', () => {
         }));
         expect(harness.output.className).toBe('prediction-output error');
         expect(harness.output.textContent).toBe('Invalid request data');
+        expect(harness.button.disabled).toBe(false);
+    });
+
+    it('renders a text error code when prediction fails with a plain text response', async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: false,
+            status: 502,
+            text: async () => 'error code: 502',
+        });
+        const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
+
+        await harness.submit();
+
+        expect(harness.output.className).toBe('prediction-output error');
+        expect(harness.output.textContent).toBe('Error: 502.');
+        expect(harness.button.disabled).toBe(false);
+    });
+
+    it('renders a plain text error message when prediction fails with a text response', async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: false,
+            status: 503,
+            text: async () => 'error: upstream unavailable',
+        });
+        const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
+
+        await harness.submit();
+
+        expect(harness.output.className).toBe('prediction-output error');
+        expect(harness.output.textContent).toBe('Error: upstream unavailable.');
+        expect(harness.button.disabled).toBe(false);
+    });
+
+    it('requires valid JSON for successful prediction responses', async () => {
+        const fetchMock = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            text: async () => 'prediction: center',
+        });
+        const harness = createPredictionUIHarness('Article text for prediction', fetchMock);
+
+        await harness.submit();
+
+        expect(harness.output.className).toBe('prediction-output error');
+        expect(harness.output.textContent).toBe('Prediction response was not valid JSON.');
         expect(harness.button.disabled).toBe(false);
     });
 

@@ -86,16 +86,52 @@
         }
 
         /*
+            * Parse a response body as JSON when possible.
+            * @param {string} bodyText - Raw response body text.
+            * @returns {object|null} - Parsed JSON body, if available.
+        */
+        function parseJSONBody(bodyText) {
+            if (!bodyText) return null;
+
+            try {
+                return JSON.parse(bodyText);
+            } catch (_error) {
+                return null;
+            }
+        }
+
+        /*
+            * Extract an error value from plain text responses such as
+            * "error code: 502" or "error: upstream unavailable".
+            * @param {string} bodyText - Raw response body text.
+            * @returns {string|null} - Parsed text error value, if available.
+        */
+        function getTextErrorValue(bodyText) {
+            if (!bodyText) return null;
+
+            const match = bodyText.match(/\berror(?:\s+code)?\s*:\s*(.+)/i);
+            if (!match || !match[1]) return null;
+
+            return match[1].trim().replace(/\.+$/, '');
+        }
+
+        /*
             * Get the best user-facing error message for a failed prediction response.
-            * "Best" means preferring a specific backend-provided error string when
-            * available, then falling back to a generic HTTP status message so the UI
-            * still gives clear feedback when the response body has no usable error.
+            * Prefer JSON error strings from Express, then text error values from
+            * deployment infrastructure, then a generic status message.
             * @param {object|null} data - Parsed response body, if available.
+            * @param {string} bodyText - Raw response body text.
             * @param {number} status - HTTP response status code.
             * @returns {string} - Error message to display.
         */
-        function getErrorMessage(data, status) {
-            if (data && typeof data.error === 'string') return data.error;
+        function getErrorMessage(data, bodyText, status) {
+            if (data && (typeof data.error === 'string' || typeof data.error === 'number')) {
+                return String(data.error);
+            }
+
+            const textErrorValue = getTextErrorValue(bodyText);
+            if (textErrorValue) return 'Error: ' + textErrorValue + '.';
+
             return 'Prediction request failed with status ' + status + '.';
         }
 
@@ -125,20 +161,19 @@
                     body: JSON.stringify({ text: text }),
                 });
 
-                let data = null;
-                try {
-                    data = await response.json();
-                } catch (_error) {
-                    throw new Error('Prediction response was not valid JSON.');
-                }
+                const bodyText = await response.text();
+                const data = parseJSONBody(bodyText);
 
                 if (!response.ok) {
-                    throw new Error(getErrorMessage(data, response.status));
+                    throw new Error(getErrorMessage(data, bodyText, response.status));
+                }
+
+                if (!data) {
+                    throw new Error('Prediction response was not valid JSON.');
                 }
 
                 // Validate the expected response shape before rendering fields.
                 if (
-                    !data ||
                     typeof data.prediction !== 'string' ||
                     typeof data.model_version !== 'string' ||
                     typeof data.label_encoder_version !== 'string'
