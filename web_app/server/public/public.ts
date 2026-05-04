@@ -90,11 +90,11 @@
             * @param {Response} response - Fetch API Response object.
             * @returns {object|null} - Parsed JSON object promise, or null if parsing failed.
         */
-        function parseJSONBody(response) {
+        async function parseJSONBody(response) {
             if (!response) return null;
 
             try {
-                return response.json();
+                return await response.json();
             } catch (_error) {
                 return null;
             }
