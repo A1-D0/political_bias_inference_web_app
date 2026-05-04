@@ -87,14 +87,14 @@
 
         /*
             * Parse a response body as JSON when possible.
-            * @param {string} bodyText - Raw response body text.
-            * @returns {object|null} - Parsed JSON body, if available.
+            * @param {Response} response - Fetch API Response object.
+            * @returns {object|null} - Parsed JSON object promise, or null if parsing failed.
         */
-        function parseJSONBody(bodyText) {
-            if (!bodyText) return null;
+        function parseJSONBody(response) {
+            if (!response) return null;
 
             try {
-                return JSON.parse(bodyText);
+                return response.json();
             } catch (_error) {
                 return null;
             }
@@ -161,8 +161,11 @@
                     body: JSON.stringify({ text: text }),
                 });
 
+                // Note that you must clone the response n-1 times, 
+                // where n is the number of times you need to read the response
+                // because the response is consumed after the first read
+                const data = await parseJSONBody(response.clone());
                 const bodyText = await response.text();
-                const data = parseJSONBody(bodyText);
 
                 if (!response.ok) {
                     throw new Error(getErrorMessage(data, bodyText, response.status));
